@@ -7,8 +7,7 @@
  */
 import React from 'react';
 import { Box, Text } from 'ink';
-import { PortEntry } from '../utils/getPorts.js';
-import type { AppMode, KillMessage } from '../types.js';
+import type { AppMode, KillMessage, PortEntry } from '../types.js';
 
 /**
  * Props for the StatusBar component.

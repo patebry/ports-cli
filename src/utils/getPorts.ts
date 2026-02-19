@@ -22,40 +22,10 @@
  * crashing.
  */
 import { execSync } from 'child_process';
+import type { PortEntry } from '../types.js';
 
-/**
- * Represents a single listening TCP port entry returned by lsof.
- */
-export interface PortEntry {
-  /** Numeric TCP port number the process is listening on. */
-  port: number;
-
-  /**
-   * Process name as reported by lsof (the COMMAND column).
-   * Note: macOS truncates long process names in lsof output; this value
-   * may not be the full executable name.
-   */
-  process: string;
-
-  /**
-   * Process ID as a string.
-   * Kept as a string because lsof outputs strings and converting to a number
-   * here would force every callsite to deal with the int — callers that pass
-   * the PID to `killPort()` can pass it through without any conversion.
-   */
-  pid: string;
-
-  /**
-   * Normalized IP address the process is bound to.
-   * Wildcard listeners (`*`, `0.0.0.0`, `[::]`, `::`) are all normalized to
-   * `0.0.0.0`. IPv6 loopback (`[::1]`, `::1`) is normalized to `127.0.0.1`.
-   * This gives callers a consistent, display-friendly address string.
-   */
-  address: string;
-
-  /** OS user account that owns the process, as reported by lsof's USER column. */
-  user: string;
-}
+/** Maximum milliseconds to wait for lsof before treating the output as empty. */
+const LSOF_TIMEOUT_MS = 5000;
 
 /**
  * Runs `lsof` and returns a sorted, deduplicated list of listening TCP ports.
@@ -70,7 +40,7 @@ export function getPorts(): PortEntry[] {
     // so process names like "com.docker.backend" are not clipped to "com.docke".
     const output = execSync('lsof -nP -iTCP -sTCP:LISTEN +c 0 2>/dev/null', {
       encoding: 'utf8',
-      timeout: 5000,
+      timeout: LSOF_TIMEOUT_MS,
     });
 
     const lines = output.trim().split('\n');

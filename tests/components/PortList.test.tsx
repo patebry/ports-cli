@@ -10,7 +10,7 @@ import React from 'react';
 import { render } from 'ink-testing-library';
 import { useStdout } from 'ink';
 import { PortList } from '../../src/components/PortList.js';
-import type { PortEntry } from '../../src/utils/getPorts.js';
+import type { PortEntry } from '../../src/types.js';
 
 const portA: PortEntry = { port: 3000, process: 'node', pid: '11111', user: 'alice', address: '127.0.0.1' };
 const portB: PortEntry = { port: 8080, process: 'python', pid: '22222', user: 'bob', address: '0.0.0.0' };

@@ -25,11 +25,18 @@ import { SearchBar } from './components/SearchBar.js';
 import { PortList } from './components/PortList.js';
 import { StatusBar } from './components/StatusBar.js';
 import { HelpOverlay } from './components/HelpOverlay.js';
-import { getPorts, PortEntry } from './utils/getPorts.js';
+import { getPorts } from './utils/getPorts.js';
 import { killPort } from './utils/killPort.js';
-import type { AppMode, KillMessage } from './types.js';
+import type { AppMode, KillMessage, PortEntry } from './types.js';
 
 export type { AppMode, KillMessage };
+
+/** Milliseconds between automatic lsof polls. */
+const AUTO_REFRESH_INTERVAL_MS = 2000;
+/** Milliseconds a kill success/error message remains visible in the StatusBar. */
+const KILL_MESSAGE_TIMEOUT_MS = 2000;
+/** Milliseconds to wait after a kill before re-polling lsof, giving the process time to exit. */
+const POST_KILL_REFRESH_DELAY_MS = 300;
 
 export function App() {
   const { exit } = useApp();
@@ -122,7 +129,7 @@ export function App() {
    */
   useEffect(() => {
     if (!killMessage) return;
-    const timer = setTimeout(() => setKillMessage(null), 2000);
+    const timer = setTimeout(() => setKillMessage(null), KILL_MESSAGE_TIMEOUT_MS);
     return () => clearTimeout(timer);
   }, [killMessage]);
 
@@ -136,7 +143,7 @@ export function App() {
    * The empty dependency array means this interval is set up once for the component lifetime.
    */
   useEffect(() => {
-    const id = setInterval(refresh, 2000);
+    const id = setInterval(refresh, AUTO_REFRESH_INTERVAL_MS);
     return () => clearInterval(id);
   }, []);
 
@@ -161,7 +168,7 @@ export function App() {
       : { type: 'error', text: `Failed: ${result.error}` }
     );
     if (killRefreshTimerRef.current !== null) clearTimeout(killRefreshTimerRef.current);
-    killRefreshTimerRef.current = setTimeout(refresh, 300);
+    killRefreshTimerRef.current = setTimeout(refresh, POST_KILL_REFRESH_DELAY_MS);
   };
 
   /** Cancels any pending post-kill refresh timer when the component unmounts. */

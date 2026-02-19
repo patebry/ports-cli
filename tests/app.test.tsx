@@ -497,4 +497,22 @@ describe('App', () => {
     const arrowPos = frame.indexOf('▶');
     expect(frame.substring(arrowPos)).toContain('nginx');
   });
+
+  // ─── Delete key in search mode ───────────────────────────────────────────────
+
+  it('removes the last character with the Delete key in search mode', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('/');
+    await tick();
+    result.stdin.write('node');
+    await tick();
+    result.stdin.write('\x1B[3~'); // VT100 Delete (forward-delete) key sequence
+    await tick();
+    // 'node' with last char removed → 'nod'; nginx (no 'nod') should be absent
+    const frame = result.lastFrame() ?? '';
+    expect(frame).toContain('nod');
+    expect(frame).not.toContain('nginx');
+  });
 });

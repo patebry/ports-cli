@@ -6,8 +6,19 @@
  */
 import React from 'react';
 import { Box, Text, useStdout } from 'ink';
-import { PortEntry } from '../utils/getPorts.js';
+import type { PortEntry } from '../types.js';
 import { PortRow, COL_PORT, COL_PID, COL_USER } from './PortRow.js';
+
+/** Fallback terminal width when stdout.columns is not available. */
+const DEFAULT_TERMINAL_WIDTH = 80;
+/** Width of the row prefix glyph ("  " or "▶ ") in characters. */
+const ROW_PREFIX_WIDTH = 2;
+/** Minimum characters reserved for the ADDRESS column at the right edge. */
+const ADDRESS_COL_MIN_WIDTH = 20;
+/** Minimum character width for the PROCESS column before it starts truncating. */
+const MIN_PROCESS_COL_WIDTH = 16;
+/** Maximum character width for the PROCESS column on very wide terminals. */
+const MAX_PROCESS_COL_WIDTH = 40;
 
 /**
  * Props for the PortList component.
@@ -32,7 +43,7 @@ export function PortList({ ports, selectedIndex }: PortListProps) {
   // Reserve space for the row prefix (2), PORT, USER, PID, and a ~20-char
   // ADDRESS column at the end. Whatever remains goes to PROCESS so it expands
   // naturally on wider terminals instead of truncating at a fixed character limit.
-  const colProcess = Math.min(40, Math.max(16, (stdout?.columns ?? 80) - 2 - COL_PORT - COL_USER - COL_PID - 20));
+  const colProcess = Math.min(MAX_PROCESS_COL_WIDTH, Math.max(MIN_PROCESS_COL_WIDTH, (stdout?.columns ?? DEFAULT_TERMINAL_WIDTH) - ROW_PREFIX_WIDTH - COL_PORT - COL_USER - COL_PID - ADDRESS_COL_MIN_WIDTH));
 
   // Headers use the same widths as PortRow so column labels always sit
   // directly above their corresponding data values.

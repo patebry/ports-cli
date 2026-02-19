@@ -7,9 +7,7 @@
  */
 import React from 'react';
 import { Box, Text } from 'ink';
-// PortEntry is the normalized data shape produced by getPorts.js after lsof
-// parsing and IPv6 normalization. Importing from utils keeps the type in one place.
-import { PortEntry } from '../utils/getPorts.js';
+import type { PortEntry } from '../types.js';
 
 /**
  * Fixed character widths for PORT, PID, and USER columns. These are stable
@@ -57,12 +55,11 @@ export function PortRow({ port, isSelected, colProcess }: PortRowProps) {
 
   if (isSelected) {
     return (
-      // @ts-expect-error — Ink's TypeScript type definitions do not declare
-      // backgroundColor as a valid prop on Box, but Ink does support it at
-      // runtime via its internal yoga-based renderer. The suppress directive
-      // avoids a compile error without altering any behavior.
-      // backgroundColor is applied to Box rather than individual Text nodes
-      // so the highlight covers the full row width, not just the text cells.
+      // @ts-expect-error — Ink's BoxProps is a `type` alias (Except<Styles, 'textWrap'>)
+      // so it cannot be extended via module augmentation. `backgroundColor` is
+      // supported at runtime by Ink's yoga renderer but absent from the type
+      // definitions. Applied to Box (not Text) so the highlight covers the full
+      // row width rather than only the text content.
       <Box backgroundColor="blue">
         {/* "▶" provides an unambiguous visual marker of the current selection
             position — more scannable than background color alone. */}
