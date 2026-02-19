@@ -1,6 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { vi, describe, it, expect, afterEach } from 'vitest';
+
+vi.mock('ink', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('ink')>();
+  const noStdout = { stdout: undefined as unknown as NodeJS.WriteStream, write: () => {} };
+  return { ...actual, useStdout: vi.fn(() => noStdout) };
+});
+
 import React from 'react';
 import { render } from 'ink-testing-library';
+import { useStdout } from 'ink';
 import { PortList } from '../../src/components/PortList.js';
 import type { PortEntry } from '../../src/utils/getPorts.js';
 
@@ -88,6 +96,28 @@ describe('PortList', () => {
       expect(frame).toContain('python');
       expect(frame).toContain('5432');
       expect(frame).toContain('postgres');
+    });
+  });
+
+  describe('terminal width adaptation', () => {
+    afterEach(() => {
+      vi.mocked(useStdout).mockReset();
+      vi.mocked(useStdout).mockReturnValue({
+        stdout: undefined as unknown as NodeJS.WriteStream,
+        write: () => {},
+      });
+    });
+
+    it('uses stdout.columns when available to compute process column width', () => {
+      // Provide a real terminal width so the stdout?.columns branch is taken.
+      vi.mocked(useStdout).mockReturnValue({
+        stdout: { columns: 160 } as unknown as NodeJS.WriteStream,
+        write: () => {},
+      });
+      const { lastFrame } = render(<PortList ports={[portA]} selectedIndex={0} />);
+      // The list still renders correctly regardless of terminal width.
+      expect(lastFrame()).toContain('PORT');
+      expect(lastFrame()).toContain('node');
     });
   });
 });

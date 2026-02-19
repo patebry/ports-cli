@@ -10,7 +10,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "esbuild bin/ports.tsx --bundle --platform=node --target=node18 --format=esm --jsx=automatic --loader:.ts=ts --loader:.tsx=tsx --loader:.js=jsx --loader:.jsx=jsx --outfile=dist/ports.js --banner:js='#!/usr/bin/env node' --external:react --external:ink --external:ink-text-input && chmod +x dist/ports.js",
+    "build": "esbuild bin/ports.tsx --bundle --platform=node --target=node18 --format=esm --jsx=automatic --loader:.ts=ts --loader:.tsx=tsx --loader:.js=jsx --loader:.jsx=jsx --outfile=dist/ports.js --banner:js='#!/usr/bin/env node' --external:react --external:ink && chmod +x dist/ports.js",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build",
     "test": "vitest run",
@@ -29,7 +29,6 @@
   "license": "MIT",
   "dependencies": {
     "ink": "^4",
-    "ink-text-input": "^5",
     "react": "^18"
   },
   "devDependencies": {
