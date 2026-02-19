@@ -55,6 +55,10 @@ interface PortListProps {
  * no servers are running on this machine or that lsof failed silently
  * (e.g. due to permissions). The message is intentionally neutral to cover
  * both cases without misleading the user.
+ *
+ * Implements a scrolling viewport that keeps the selected item visible:
+ * calculates how many rows fit in the terminal and only renders that window
+ * of ports, centered around the selection when possible.
  */
 export function PortList({ ports, selectedIndex }: PortListProps) {
   const { stdout } = useStdout();
@@ -62,6 +66,32 @@ export function PortList({ ports, selectedIndex }: PortListProps) {
   // ADDRESS column at the end. Whatever remains goes to PROCESS so it expands
   // naturally on wider terminals instead of truncating at a fixed character limit.
   const colProcess = calculateProcessColWidth(stdout?.columns ?? DEFAULT_TERMINAL_WIDTH);
+
+  // Calculate how many port rows can fit in the terminal.
+  // Total overhead: SearchBar (3 lines with border) + header row (1) + StatusBar (1) = 5 lines.
+  // We also add 1 for the empty state message to prevent it from being cut off.
+  const terminalRows = stdout?.rows ?? 24; // Fallback to 24 if rows unavailable
+  const maxVisiblePorts = Math.max(1, terminalRows - 6);
+
+  // Calculate the visible window of ports to display.
+  // Strategy: keep the selected item roughly centered in the viewport when scrolling.
+  let startIndex = 0;
+  let endIndex = ports.length;
+
+  if (ports.length > maxVisiblePorts) {
+    // Try to center the selected item in the viewport
+    const halfWindow = Math.floor(maxVisiblePorts / 2);
+    startIndex = Math.max(0, selectedIndex - halfWindow);
+    endIndex = startIndex + maxVisiblePorts;
+
+    // If we're near the end, adjust to show the last N ports
+    if (endIndex > ports.length) {
+      endIndex = ports.length;
+      startIndex = Math.max(0, endIndex - maxVisiblePorts);
+    }
+  }
+
+  const visiblePorts = ports.slice(startIndex, endIndex);
 
   // Headers use the same widths as PortRow so column labels always sit
   // directly above their corresponding data values.
@@ -89,18 +119,22 @@ export function PortList({ ports, selectedIndex }: PortListProps) {
           <Text dimColor>No listening ports found.</Text>
         </Box>
       ) : (
-        ports.map((port, i) => (
-          <PortRow
-            // Key combines pid, port number, and address because port number
-            // alone is not unique — two processes can bind the same port number
-            // on different interfaces (e.g. 0.0.0.0:3000 and 127.0.0.1:3000).
-            // All three fields together form a stable, unique identifier.
-            key={`${port.pid}-${port.port}-${port.address}`}
-            port={port}
-            isSelected={i === selectedIndex}
-            colProcess={colProcess}
-          />
-        ))
+        visiblePorts.map((port, i) => {
+          // The actual index in the full ports array (not the visible slice)
+          const actualIndex = startIndex + i;
+          return (
+            <PortRow
+              // Key combines pid, port number, and address because port number
+              // alone is not unique — two processes can bind the same port number
+              // on different interfaces (e.g. 0.0.0.0:3000 and 127.0.0.1:3000).
+              // All three fields together form a stable, unique identifier.
+              key={`${port.pid}-${port.port}-${port.address}`}
+              port={port}
+              isSelected={actualIndex === selectedIndex}
+              colProcess={colProcess}
+            />
+          );
+        })
       )}
     </Box>
   );
