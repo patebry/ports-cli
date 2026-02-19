@@ -8,6 +8,7 @@ const samplePort: PortEntry = {
   port: 3000,
   process: 'node',
   pid: '12345',
+  user: 'root',
   address: '127.0.0.1',
 };
 

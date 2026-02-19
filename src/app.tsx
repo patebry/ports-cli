@@ -19,7 +19,7 @@
  *                                         searchQuery (user input)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, useInput, useApp } from 'ink';
 import { SearchBar } from './components/SearchBar.js';
 import { PortList } from './components/PortList.js';
@@ -71,6 +71,13 @@ export function App() {
 
   /** Whether the full-screen help overlay is visible. Toggled by `?` in navigate mode. */
   const [showHelp, setShowHelp] = useState<boolean>(false);
+
+  /**
+   * Tracks the pending post-kill refresh timer so it can be cancelled on unmount.
+   * Without this, the timer fires after the component is gone and calls getPorts()
+   * on a dead component — harmless in production but leaks in tests.
+   */
+  const killRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /**
    * Whether the inline kill-confirmation prompt is active ("Kill process:port? [y/ESC]").
@@ -156,6 +163,12 @@ export function App() {
    * The 300ms delay before refresh gives the killed process time to fully exit so
    * that the next lsof call no longer reports it — without the delay the entry can
    * briefly reappear in the list before disappearing on the following poll cycle.
+   *
+   * The timer is tracked in killRefreshTimerRef so that:
+   *   - A rapid second kill cancels the previous pending refresh (avoiding a stale
+   *     lsof snapshot from the first kill overwriting a fresher one).
+   *   - The timer is cancelled on unmount so it does not fire after the component
+   *     is gone (which would call getPorts on a dead component).
    */
   const executeKill = () => {
     if (!selectedPort) return;
@@ -164,8 +177,14 @@ export function App() {
       ? { type: 'success', text: `Killed ${selectedPort.process} (${selectedPort.pid})` }
       : { type: 'error', text: `Failed: ${result.error}` }
     );
-    setTimeout(refresh, 300);
+    if (killRefreshTimerRef.current !== null) clearTimeout(killRefreshTimerRef.current);
+    killRefreshTimerRef.current = setTimeout(refresh, 300);
   };
+
+  /** Cancels any pending post-kill refresh timer when the component unmounts. */
+  useEffect(() => () => {
+    if (killRefreshTimerRef.current !== null) clearTimeout(killRefreshTimerRef.current);
+  }, []);
 
   /**
    * Central keyboard handler. Ink calls this for EVERY keypress regardless of which

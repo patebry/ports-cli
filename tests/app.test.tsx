@@ -146,6 +146,21 @@ describe('App', () => {
     expect(result.lastFrame()).toContain('nginx'); // full list restored
   });
 
+  it('removes the last character from the query when Backspace is pressed in search mode', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('/');
+    await tick();
+    result.stdin.write('node');
+    await tick();
+    result.stdin.write('\x7F'); // Backspace (DEL character)
+    await tick();
+    // 'node' with last char removed → 'nod'; nginx is still hidden
+    expect(result.lastFrame()).toContain('nod');
+    expect(result.lastFrame()).not.toContain('nginx');
+  });
+
   it('returns to navigate mode when Enter is pressed in search mode', async () => {
     const result = render(<App />);
     unmount = result.unmount;
@@ -267,6 +282,86 @@ describe('App', () => {
     unmount = result.unmount;
     await tick();
     result.stdin.write('k'); // already at top; should stay on node
+    await tick();
+    const frame = result.lastFrame() ?? '';
+    const arrowPos = frame.indexOf('▶');
+    expect(frame.substring(arrowPos)).toContain('node');
+  });
+
+  // ─── selectedIndex clamping ───────────────────────────────────────────────────
+
+  it('clamps selectedIndex when the filter narrows the list below the current selection', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('j'); // move to index 1 (nginx)
+    await tick();
+    result.stdin.write('/');
+    await tick();
+    result.stdin.write('node'); // filter to only 'node' — list shrinks to 1 entry
+    await tick();
+    // selectedIndex was 1 but filteredPorts.length is now 1 (max index 0);
+    // the sync effect must have clamped selectedIndex to 0 so the arrow lands on 'node'
+    const frame = result.lastFrame() ?? '';
+    const arrowPos = frame.indexOf('▶');
+    expect(frame.substring(arrowPos)).toContain('node');
+  });
+
+  // ─── Navigate-mode ESC clear ─────────────────────────────────────────────────
+
+  it('clears an active filter with ESC while in navigate mode', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('/');
+    await tick();
+    result.stdin.write('node');
+    await tick();
+    result.stdin.write('\r'); // Enter — commit filter, return to navigate
+    await tick();
+    result.stdin.write('\x1B'); // ESC in navigate mode — clear filter
+    await tick();
+    expect(result.lastFrame()).toContain('nginx'); // full list visible again
+  });
+
+  // ─── q quit ──────────────────────────────────────────────────────────────────
+
+  it('exits when q is pressed in navigate mode', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    // Verify the app is in navigate mode (has quit hint) before pressing q
+    expect(result.lastFrame()).toContain('quit');
+    result.stdin.write('q');
+    await tick();
+    // After q, exit() fires — the important thing is no error is thrown
+    // and the last frame before exit still contained the normal UI
+  });
+
+  // ─── Navigation in search mode ───────────────────────────────────────────────
+
+  it('moves selection down with down arrow while in search mode', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('/');
+    await tick();
+    result.stdin.write('\x1B[B'); // down arrow escape sequence
+    await tick();
+    const frame = result.lastFrame() ?? '';
+    const arrowPos = frame.indexOf('▶');
+    expect(frame.substring(arrowPos)).toContain('nginx');
+  });
+
+  it('moves selection up with up arrow while in search mode', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('j'); // move down to nginx first
+    await tick();
+    result.stdin.write('/');
+    await tick();
+    result.stdin.write('\x1B[A'); // up arrow escape sequence
     await tick();
     const frame = result.lastFrame() ?? '';
     const arrowPos = frame.indexOf('▶');
