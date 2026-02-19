@@ -147,7 +147,9 @@ describe('useKeyboardInput', () => {
     await tick();
     result.stdin.write('n');
     await tick();
-    expect(props.setSearchQuery).toHaveBeenCalled();
+    const updater = vi.mocked(props.setSearchQuery).mock.calls[0][0];
+    expect(typeof updater).toBe('function');
+    expect((updater as (prev: string) => string)('existing')).toBe('existingn');
   });
 
   it('exits search mode on ESC', async () => {
@@ -164,7 +166,9 @@ describe('useKeyboardInput', () => {
     await tick();
     result.stdin.write('\x7F'); // Backspace
     await tick();
-    expect(props.setSearchQuery).toHaveBeenCalled();
+    const updater = vi.mocked(props.setSearchQuery).mock.calls[0][0];
+    expect(typeof updater).toBe('function');
+    expect((updater as (prev: string) => string)('hello')).toBe('hell');
   });
 
   // --- Kill confirmation ---

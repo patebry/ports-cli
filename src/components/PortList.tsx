@@ -7,7 +7,7 @@
 import React from 'react';
 import { Box, Text, useStdout } from 'ink';
 import type { PortEntry } from '../types.js';
-import { PortRow, COL_PORT, COL_PID, COL_USER } from './PortRow.js';
+import { PortRow, COL_PORT, COL_PID, COL_USER, UNSELECTED_PREFIX } from './PortRow.js';
 
 /** Fallback terminal width when stdout.columns is not available. */
 const DEFAULT_TERMINAL_WIDTH = 80;
@@ -112,7 +112,7 @@ export function PortList({ ports, selectedIndex }: PortListProps): React.JSX.Ele
   return (
     <Box flexDirection='column'>
       <Box paddingX={1}>
-        <Text>{'  '}</Text>
+        <Text>{UNSELECTED_PREFIX}</Text>
         <Text bold color='gray'>{portHeader}</Text>
         <Text bold color='gray'>{processHeader}</Text>
         <Text bold color='gray'>{userHeader}</Text>

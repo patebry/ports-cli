@@ -3,7 +3,7 @@
  *
  * Rendered on top of the main UI when the user presses "?". Because Ink
  * renders components in document order and does not have a true z-index,
- * the App component conditionally renders this instead of the main layout
+ * the App component conditionally appends this below the main layout
  * when showHelp is true, achieving the modal effect.
  */
 import React from 'react';

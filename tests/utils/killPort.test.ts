@@ -94,4 +94,25 @@ describe('killPort', () => {
 
     expect(killPort('55')).toEqual({ success: false, error: 'raw string error' });
   });
+
+  // ---------------------------------------------------------------------------
+  // Empty and whitespace-only PID strings
+  // ---------------------------------------------------------------------------
+  it('returns { success: false, error: "Invalid PID" } for empty string ""', () => {
+    expect(killPort('')).toEqual({ success: false, error: 'Invalid PID' });
+  });
+
+  it('does not call execSync for empty string PID', () => {
+    killPort('');
+    expect(mockExecSync).not.toHaveBeenCalled();
+  });
+
+  it('returns { success: false, error: "Invalid PID" } for whitespace-only string "  "', () => {
+    expect(killPort('  ')).toEqual({ success: false, error: 'Invalid PID' });
+  });
+
+  it('does not call execSync for whitespace-only PID', () => {
+    killPort('  ');
+    expect(mockExecSync).not.toHaveBeenCalled();
+  });
 });

@@ -43,7 +43,7 @@ interface AppProps {
   _killMessageTimeoutMs?: number;
 }
 
-export function App({ _killMessageTimeoutMs = KILL_MESSAGE_TIMEOUT_MS }: AppProps = {}): React.JSX.Element {
+export function App({ _killMessageTimeoutMs = KILL_MESSAGE_TIMEOUT_MS }: AppProps): React.JSX.Element {
   const { exit } = useApp();
 
   /** Master list of listening TCP ports from lsof. Refreshed every 2 seconds by the auto-refresh effect. */

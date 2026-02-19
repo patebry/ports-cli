@@ -221,4 +221,27 @@ describe('getPorts', () => {
       { port: 3000, process: 'node', pid: '12345', user: 'user', address: '127.0.0.1' },
     ]);
   });
+
+  // ---------------------------------------------------------------------------
+  // 12. IPv4 + IPv6 loopback deduplication (same PID, same port)
+  // ---------------------------------------------------------------------------
+  it('deduplicates IPv4 127.0.0.1 and IPv6 [::1] entries for the same PID and port', () => {
+    const output = [
+      HEADER,
+      makeLine('node', '77', 'user', '127.0.0.1:3000'),
+      makeLine('node', '77', 'user', '[::1]:3000'),
+    ].join('\n');
+
+    mockExecSync.mockReturnValue(output);
+
+    const result = getPorts();
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual({
+      port: 3000,
+      process: 'node',
+      pid: '77',
+      user: 'user',
+      address: '127.0.0.1',
+    });
+  });
 });

@@ -580,11 +580,29 @@ describe('App', () => {
     const frame = result.lastFrame() ?? '';
     expect(frame).toContain('No listening ports found');
   });
+
+  it('filters the port list by address', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('/');
+    await tick(); // let mode='search' re-render before typing characters
+    result.stdin.write('127');
+    await tick();
+    // "127" matches address "127.0.0.1" on the node entry but not "0.0.0.0" on nginx
+    expect(result.lastFrame()).toContain('node');
+    expect(result.lastFrame()).not.toContain('nginx');
+  });
 });
 
 // --- kill message auto-clear ---
 describe('kill message auto-clear', () => {
   let unmount: (() => void) | undefined;
+
+  beforeEach(() => {
+    mockKillPort.mockReturnValue({ success: true });
+    mockGetPorts.mockReturnValue(PORTS);
+  });
 
   afterEach(() => {
     unmount?.();

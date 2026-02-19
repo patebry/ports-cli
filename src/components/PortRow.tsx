@@ -19,6 +19,7 @@ export const COL_PID = 8;
 export const COL_USER = 14;
 
 const SELECTION_ARROW = '▶ ';
+export const UNSELECTED_PREFIX = '  ';
 
 /**
  * Box with backgroundColor support. Ink's BoxProps type definition does not
@@ -82,7 +83,7 @@ export function PortRow({ port, isSelected, colProcess }: PortRowProps): React.J
 
   return (
     <Box>
-      <Text>{'  '}</Text>
+      <Text>{UNSELECTED_PREFIX}</Text>
       <Text>{portStr}</Text>
       <Text>{processStr}</Text>
       <Text dimColor>{userStr}</Text>
