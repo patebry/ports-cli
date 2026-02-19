@@ -10,6 +10,26 @@ import React from 'react';
 import { Box, Text } from 'ink';
 
 /**
+ * Data-driven keybinding list. Adding or renaming a shortcut only requires
+ * editing this array — the rendering loop below computes column widths
+ * dynamically, so alignment stays correct regardless of label length.
+ */
+const KEYBINDINGS: Array<{ key: string; desc: string }> = [
+  { key: '↑ / k',    desc: 'Move up' },
+  { key: '↓ / j',    desc: 'Move down' },
+  { key: 'enter',    desc: 'Kill selected port (with confirm)' },
+  { key: 'ctrl+k',   desc: 'Kill selected port (no confirm)' },
+  { key: '/ + type', desc: 'Filter by name, port, or address' },
+  { key: 'ESC',      desc: 'Clear filter / exit search' },
+  { key: 'r / R',    desc: 'Refresh port list' },
+  { key: '?',        desc: 'Toggle this help' },
+  { key: 'q',        desc: 'Quit' },
+  { key: 'ctrl+c',   desc: 'Quit' },
+];
+
+const maxKeyLen = Math.max(...KEYBINDINGS.map(b => b.key.length));
+
+/**
  * Renders the help overlay with a complete keybinding reference.
  *
  * Kept as a separate component so the full list of keybindings lives in
@@ -25,20 +45,11 @@ export function HelpOverlay() {
     <Box borderStyle="round" borderColor="cyan" flexDirection="column" paddingX={2} paddingY={1}>
       <Text bold color="cyan">  Keybindings</Text>
       <Text> </Text>
-      {/* Each key label is manually padded to a fixed width with trailing spaces.
-          Ink's Text component does not support CSS-style column layouts, so
-          fixed-width string literals are the only way to achieve visual alignment
-          between the key column and the description column. */}
-      <Text><Text color="cyan" bold>{'↑ / k          '}</Text>Move up</Text>
-      <Text><Text color="cyan" bold>{'↓ / j          '}</Text>Move down</Text>
-      <Text><Text color="cyan" bold>{'enter          '}</Text>Kill selected port (with confirm)</Text>
-      <Text><Text color="cyan" bold>{'ctrl+k         '}</Text>Kill selected port (no confirm)</Text>
-      <Text><Text color="cyan" bold>{'/ + type       '}</Text>Filter by name, port, or address</Text>
-      <Text><Text color="cyan" bold>{'ESC            '}</Text>Clear filter / exit search</Text>
-      <Text><Text color="cyan" bold>{'r / R          '}</Text>Refresh port list</Text>
-      <Text><Text color="cyan" bold>{'?              '}</Text>Toggle this help</Text>
-      <Text><Text color="cyan" bold>{'q              '}</Text>Quit</Text>
-      <Text><Text color="cyan" bold>{'ctrl+c         '}</Text>Quit</Text>
+      {KEYBINDINGS.map(({ key, desc }) => (
+        <Text key={key}>
+          <Text color="cyan" bold>{key.padEnd(maxKeyLen)}</Text>{'  '}{desc}
+        </Text>
+      ))}
       <Text> </Text>
       {/* App handles closure: any keypress while showHelp is true dismisses
           the overlay, so no dedicated close key is needed. */}

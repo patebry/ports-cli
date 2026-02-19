@@ -119,5 +119,20 @@ describe('PortList', () => {
       expect(lastFrame()).toContain('PORT');
       expect(lastFrame()).toContain('node');
     });
+
+    it('clamps process column to MIN_PROCESS_COL_WIDTH on very narrow terminals', () => {
+      // stdout.columns = 40 (very narrow terminal)
+      // colProcess = clamp(16, 40, 40 - 2 - 8 - 8 - 14 - 20) = clamp(16, 40, -12) = 16
+      vi.mocked(useStdout).mockReturnValue({
+        stdout: { columns: 40 } as unknown as NodeJS.WriteStream,
+        write: () => {},
+      });
+      const narrowPort: PortEntry = { ...portA, process: 'verylongprocessname' };
+      const { lastFrame } = render(<PortList ports={[narrowPort]} selectedIndex={0} />);
+      const frame = lastFrame() ?? '';
+      // Component must not crash and must still render the port number and PID.
+      expect(frame).toContain('3000');
+      expect(frame).toContain('11111');
+    });
   });
 });

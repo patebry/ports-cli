@@ -18,6 +18,8 @@ export const COL_PORT = 8;
 export const COL_PID = 8;
 export const COL_USER = 14;
 
+const SELECTION_ARROW = '▶ ';
+
 /**
  * Props for the PortRow component.
  */
@@ -63,7 +65,7 @@ export function PortRow({ port, isSelected, colProcess }: PortRowProps) {
       <Box backgroundColor="blue">
         {/* "▶" provides an unambiguous visual marker of the current selection
             position — more scannable than background color alone. */}
-        <Text color="cyan">{'▶ '}</Text>
+        <Text color="cyan">{SELECTION_ARROW}</Text>
         <Text color="cyan">{portStr}</Text>
         <Text color="cyan">{processStr}</Text>
         <Text color="cyan">{userStr}</Text>

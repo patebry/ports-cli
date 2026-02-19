@@ -9,6 +9,8 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 
+const CURSOR_CHAR = '█';
+
 /**
  * Props for the SearchBar component.
  */
@@ -38,8 +40,8 @@ export function SearchBar({ value, isActive }: SearchBarProps) {
       <Text color={isActive ? 'cyan' : value ? 'yellow' : 'gray'}>{'  / '}</Text>
       {isActive
         ? value
-          ? <Text>{value}<Text color="cyan">█</Text></Text>
-          : <Text dimColor>type to filter...<Text color="cyan">█</Text></Text>
+          ? <Text>{value}<Text color="cyan">{CURSOR_CHAR}</Text></Text>
+          : <Text dimColor>type to filter...<Text color="cyan">{CURSOR_CHAR}</Text></Text>
         : value
           ? <Text color="yellow">{value}</Text>
           : <Text dimColor>to search</Text>

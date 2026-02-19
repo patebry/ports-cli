@@ -89,7 +89,7 @@ describe('PortRow', () => {
       const { lastFrame } = render(
         <PortRow port={longNamePort} isSelected={false} colProcess={20} />,
       );
-      // 'averylongprocessname_extra' is 26 chars; slice(0, 20) → 'averylongprocessname'
+      // 'averylongprocessname_extra' is 26 chars; slice(0, 20) => 'averylongprocessname'
       expect(lastFrame()).toContain('averylongprocessname');
       expect(lastFrame()).not.toContain('averylongprocessname_extra');
     });
@@ -99,6 +99,18 @@ describe('PortRow', () => {
         <PortRow port={samplePort} isSelected={false} colProcess={20} />,
       );
       expect(lastFrame()).toContain('node');
+    });
+  });
+
+  describe('user field truncation', () => {
+    it('truncates user field to COL_USER (14) characters', () => {
+      // 'averylongusername' is 17 chars; slice(0, 14) => 'averylongusern'
+      const longUserPort: PortEntry = { ...samplePort, user: 'averylongusername' };
+      const { lastFrame } = render(
+        <PortRow port={longUserPort} isSelected={false} colProcess={COL_PROCESS} />,
+      );
+      expect(lastFrame()).toContain('averylongusern');
+      expect(lastFrame()).not.toContain('averylongusername');
     });
   });
 });

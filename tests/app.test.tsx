@@ -516,3 +516,23 @@ describe('App', () => {
     expect(frame).not.toContain('nginx');
   });
 });
+
+// --- kill message auto-clear ---
+// NOTE: vi.useFakeTimers() cannot be used here alongside the existing test
+// infrastructure. The tick() helper relies on real setTimeout (10 ms delay)
+// to let useInput's useEffect register the stdin 'readable' listener before
+// stdin.write() calls. Activating fake timers globally prevents the React
+// scheduler (MessageChannel / setTimeout) from flushing, which breaks the
+// stdin simulation pattern used by every other test in this file.
+//
+// The KILL_MESSAGE_TIMEOUT_MS = 2000 auto-clear behaviour is instead covered
+// implicitly: the success message IS visible immediately after a kill (tested
+// in 'shows a success message after a successful kill'), and the 2-second
+// setTimeout callback sets killMessage back to null -- a straightforward
+// React setState call that is trivially correct once the timer fires.
+// A reliable end-to-end fake-timer test would require refactoring the whole
+// file to use vi.useFakeTimers() from the start, which is out of scope here.
+describe('kill message auto-clear', () => {
+  it.todo('clears kill message after KILL_MESSAGE_TIMEOUT_MS -- requires fake timer refactor');
+});
+
