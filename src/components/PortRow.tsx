@@ -12,12 +12,10 @@ import { Box, Text } from 'ink';
 import { PortEntry } from '../utils/getPorts.js';
 
 /**
- * Fixed character widths for each column. These must match the header widths
- * defined in PortList so that header labels and row values remain aligned.
- * Changing any of these values requires a matching change in PortList's headers.
+ * Fixed character widths for PORT and PID columns. These are stable regardless
+ * of terminal size: port numbers top out at 5 digits and PIDs at 7.
  */
 const COL_PORT = 8;
-const COL_PROCESS = 16;
 const COL_PID = 8;
 
 /**
@@ -28,6 +26,12 @@ interface PortRowProps {
   port: PortEntry;
   /** Whether this row is the currently focused/selected row in the list. */
   isSelected: boolean;
+  /**
+   * Character width allocated to the PROCESS column. Computed dynamically by
+   * PortList based on the current terminal width so the column expands on
+   * wider terminals rather than always truncating at a fixed 16-character limit.
+   */
+  colProcess: number;
 }
 
 /**
@@ -37,13 +41,14 @@ interface PortRowProps {
  * (blue background, cyan text, arrow indicator) and a plain layout for all
  * other rows. The column values are padded to fixed widths for alignment.
  */
-export function PortRow({ port, isSelected }: PortRowProps) {
+export function PortRow({ port, isSelected, colProcess }: PortRowProps) {
   // padEnd() pads each value to its column's fixed character width so all rows
   // line up vertically in a monospace terminal regardless of content length.
   const portStr = String(port.port).padEnd(COL_PORT);
   // slice() truncates long process names before padEnd() to prevent overflow
-  // into the next column; a 17-character process name would push PID sideways.
-  const processStr = port.process.slice(0, COL_PROCESS).padEnd(COL_PROCESS);
+  // into the next column. colProcess is computed dynamically by PortList based
+  // on the current terminal width, so this truncation point grows with the window.
+  const processStr = port.process.slice(0, colProcess).padEnd(colProcess);
   const pidStr = String(port.pid).padEnd(COL_PID);
   const addressStr = port.address;
 
@@ -78,4 +83,4 @@ export function PortRow({ port, isSelected }: PortRowProps) {
   );
 }
 
-export { COL_PORT, COL_PROCESS, COL_PID };
+export { COL_PORT, COL_PID };

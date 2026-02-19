@@ -5,9 +5,9 @@
  * COL_* constants from it to guarantee header and row columns stay aligned.
  */
 import React from 'react';
-import { Box, Text } from 'ink';
+import { Box, Text, useStdout } from 'ink';
 import { PortEntry } from '../utils/getPorts.js';
-import { PortRow, COL_PORT, COL_PROCESS, COL_PID } from './PortRow.js';
+import { PortRow, COL_PORT, COL_PID } from './PortRow.js';
 
 /**
  * Props for the PortList component.
@@ -28,11 +28,16 @@ interface PortListProps {
  * both cases without misleading the user.
  */
 export function PortList({ ports, selectedIndex }: PortListProps) {
-  // Headers use the same COL_* constants as PortRow so that column labels
-  // always sit directly above their corresponding data values. If column
-  // widths ever change, both header and rows update together automatically.
+  const { stdout } = useStdout();
+  // Reserve space for the row prefix (2), PORT, PID, and a ~20-char ADDRESS
+  // column at the end. Whatever remains goes to PROCESS so it expands naturally
+  // on wider terminals instead of truncating at a fixed character limit.
+  const colProcess = Math.min(40, Math.max(16, (stdout?.columns ?? 80) - 2 - COL_PORT - COL_PID - 20));
+
+  // Headers use the same widths as PortRow so column labels always sit
+  // directly above their corresponding data values.
   const portHeader = 'PORT'.padEnd(COL_PORT);
-  const processHeader = 'PROCESS'.padEnd(COL_PROCESS);
+  const processHeader = 'PROCESS'.padEnd(colProcess);
   const pidHeader = 'PID'.padEnd(COL_PID);
 
   return (
@@ -62,6 +67,7 @@ export function PortList({ ports, selectedIndex }: PortListProps) {
             key={`${port.pid}-${port.port}-${port.address}`}
             port={port}
             isSelected={i === selectedIndex}
+            colProcess={colProcess}
           />
         ))
       )}

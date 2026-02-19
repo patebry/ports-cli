@@ -4,7 +4,7 @@
  * Parses `lsof` output to produce a deduplicated list of all TCP ports
  * currently in the LISTEN state on the local machine.
  *
- * **Why `lsof -nP -iTCP -sTCP:LISTEN`?**
+ * **Why `lsof -nP -iTCP -sTCP:LISTEN +c 0`?**
  * - `-n`  Skip DNS reverse lookups. Without this, lsof queries DNS for every
  *         address it finds, which can add several seconds of latency.
  * - `-P`  Use numeric port numbers instead of looking up service names in
@@ -12,6 +12,8 @@
  * - `-iTCP`       Filter to TCP sockets only; ignores UDP, pipes, files, etc.
  * - `-sTCP:LISTEN` Further filter to sockets in the LISTEN state only;
  *                  excludes ESTABLISHED, TIME_WAIT, and other transient states.
+ * - `+c 0` Remove lsof's default 9-character truncation of the COMMAND column
+ *          so long process names like "com.docker.backend" are shown in full.
  *
  * **Why a 5-second timeout?**
  * `lsof` can hang indefinitely when the machine has stale NFS or network
@@ -61,7 +63,9 @@ export interface PortEntry {
  */
 export function getPorts(): PortEntry[] {
   try {
-    const output = execSync('lsof -nP -iTCP -sTCP:LISTEN 2>/dev/null', {
+    // +c 0 removes lsof's default 9-character truncation on the COMMAND column
+    // so process names like "com.docker.backend" are not clipped to "com.docke".
+    const output = execSync('lsof -nP -iTCP -sTCP:LISTEN +c 0 2>/dev/null', {
       encoding: 'utf8',
       timeout: 5000,
     });
