@@ -21,6 +21,24 @@ const MIN_PROCESS_COL_WIDTH = 16;
 const MAX_PROCESS_COL_WIDTH = 40;
 
 /**
+ * Calculates the dynamic width for the PROCESS column based on terminal width.
+ *
+ * The PROCESS column receives whatever space remains after allocating fixed
+ * widths for PORT, USER, PID, and ADDRESS columns, clamped between min/max bounds.
+ *
+ * @param terminalWidth - Current terminal width in characters (from stdout.columns)
+ * @returns Character width for PROCESS column, clamped to [MIN_PROCESS_COL_WIDTH, MAX_PROCESS_COL_WIDTH]
+ */
+function calculateProcessColWidth(terminalWidth: number): number {
+  // Allocate space: row prefix (2) + PORT + USER + PID + ADDRESS reserve
+  const reserved = ROW_PREFIX_WIDTH + COL_PORT + COL_USER + COL_PID + ADDRESS_COL_MIN_WIDTH;
+  const available = terminalWidth - reserved;
+
+  // Clamp to min/max bounds so column doesn't become unusably narrow or wastefully wide
+  return Math.min(MAX_PROCESS_COL_WIDTH, Math.max(MIN_PROCESS_COL_WIDTH, available));
+}
+
+/**
  * Props for the PortList component.
  */
 interface PortListProps {
@@ -43,7 +61,7 @@ export function PortList({ ports, selectedIndex }: PortListProps) {
   // Reserve space for the row prefix (2), PORT, USER, PID, and a ~20-char
   // ADDRESS column at the end. Whatever remains goes to PROCESS so it expands
   // naturally on wider terminals instead of truncating at a fixed character limit.
-  const colProcess = Math.min(MAX_PROCESS_COL_WIDTH, Math.max(MIN_PROCESS_COL_WIDTH, (stdout?.columns ?? DEFAULT_TERMINAL_WIDTH) - ROW_PREFIX_WIDTH - COL_PORT - COL_USER - COL_PID - ADDRESS_COL_MIN_WIDTH));
+  const colProcess = calculateProcessColWidth(stdout?.columns ?? DEFAULT_TERMINAL_WIDTH);
 
   // Headers use the same widths as PortRow so column labels always sit
   // directly above their corresponding data values.

@@ -53,6 +53,8 @@ export function getPorts(): PortEntry[] {
     const ports: PortEntry[] = [];
 
     for (const line of dataLines) {
+      // Skip empty lines that may appear in lsof output when processes exit
+      // between the time lsof starts and when it writes output
       if (!line.trim()) continue;
 
       const parts = line.trim().split(/\s+/);
@@ -61,6 +63,11 @@ export function getPorts(): PortEntry[] {
       //   0:COMMAND  1:PID  2:USER  3:FD  4:TYPE  5:DEVICE  6:SIZE/OFF  7:NODE  8:NAME
       // NAME (index 8) holds the address:port string we need to parse.
       // Any line with fewer than 9 columns is malformed; skip it.
+      //
+      // Malformed lines can occur when:
+      // - The process name contains whitespace (lsof would split it incorrectly)
+      // - A process exits mid-query and produces incomplete output
+      // - lsof hits an error reading a socket (e.g., permission denied)
       if (parts.length < 9) continue;
 
       const processName = parts[0];
@@ -72,8 +79,13 @@ export function getPorts(): PortEntry[] {
       // An IPv6 NAME field looks like `[::1]:3000` — the host portion itself
       // contains colons, so indexOf(':') would land inside the address rather
       // than at the separator before the port number.
+      //
+      // Examples:
+      // - IPv4: "127.0.0.1:3000" → lastIndexOf finds the only colon
+      // - IPv6: "[::1]:8080" → lastIndexOf finds the colon after "]"
+      // - IPv6 wildcard: "[::]:5432" → lastIndexOf finds the final colon
       const lastColon = addrPort.lastIndexOf(':');
-      if (lastColon === -1) continue;
+      if (lastColon === -1) continue; // No colon = malformed; skip
 
       const rawAddr = addrPort.slice(0, lastColon);
       const port = parseInt(addrPort.slice(lastColon + 1), 10);
@@ -84,6 +96,11 @@ export function getPorts(): PortEntry[] {
       // lsof may report wildcard listeners as `*`, `0.0.0.0`, `[::]`, or `::`.
       // All four mean "listening on all interfaces"; unify them so the UI can
       // display and deduplicate them consistently.
+      //
+      // Why this matters:
+      // - Prevents duplicate rows for dual-stack processes (IPv4 + IPv6)
+      // - Gives users a consistent address representation
+      // - Simplifies filtering logic (search for "0.0.0.0" finds all wildcards)
       let address = rawAddr;
       if (address === '*' || address === '0.0.0.0' || address === '[::]' || address === '::') {
         address = '0.0.0.0';
@@ -100,6 +117,10 @@ export function getPorts(): PortEntry[] {
       // socket on `0.0.0.0` (IPv4) and another on `[::]` (IPv6) for the same
       // port. After normalization both produce the same key, so we only keep
       // the first row lsof reports rather than showing a duplicate entry.
+      //
+      // Edge case: Different PIDs on the same address:port are NOT duplicates
+      // (e.g., nginx master vs worker processes). The PID in the key ensures
+      // these are treated as distinct entries.
       const key = `${address}:${port}:${pid}`;
       if (seen.has(key)) continue;
       seen.add(key);

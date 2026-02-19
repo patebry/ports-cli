@@ -26,16 +26,23 @@ const PORTS = [
  * Wait for one macro-task cycle so React 18's MessageChannel-based scheduler
  * can flush pending work.
  *
- * Two separate uses:
- * 1. Called BEFORE stdin.write() to let `useInput`'s useEffect fire.
- *    The effect calls setRawMode(true) which registers stdin's 'readable'
- *    listener. Without this first tick, stdin.write() is silently dropped
- *    because no one is listening yet.
- * 2. Called AFTER stdin.write() to let the resulting React state updates
- *    re-render before we read lastFrame().
+ * CRITICAL INK TESTING PATTERN:
  *
- * Note: vi.useFakeTimers() must NOT be active — it prevents React's internal
+ * stdin.write() in ink-testing-library v4 does NOT work immediately after render().
+ * useInput registers its stdin 'readable' listener inside a useEffect (async after render).
+ *
+ * Required pattern:
+ * 1. await tick() BEFORE stdin.write() - lets useInput's useEffect fire and register listener
+ * 2. stdin.write('key') - now someone is listening
+ * 3. await tick() AFTER stdin.write() - lets React re-render with new state
+ *
+ * Mode changes require a tick between them:
+ *   write '/'; await tick(); write 'node'; await tick()
+ *
+ * IMPORTANT: vi.useFakeTimers() must NOT be active - it prevents React's internal
  * scheduler (which uses real setTimeout/MessageChannel) from firing.
+ *
+ * Always call unmount() in afterEach to stop the polling interval.
  */
 const tick = () => new Promise<void>(resolve => setTimeout(resolve, 10));
 
@@ -575,4 +582,3 @@ describe('kill message auto-clear', () => {
     expect(frame).not.toContain('Killed');
   });
 });
-

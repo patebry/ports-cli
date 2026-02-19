@@ -10,9 +10,18 @@ import React from 'react';
 import { Box, Text } from 'ink';
 
 /**
- * Data-driven keybinding list. Adding or renaming a shortcut only requires
- * editing this array — the rendering loop below computes column widths
- * dynamically, so alignment stays correct regardless of label length.
+ * Complete list of application keybindings shown in the help overlay.
+ *
+ * Data-driven design: adding or renaming a shortcut only requires editing
+ * this array. The rendering loop computes column widths dynamically, so
+ * alignment stays correct regardless of label length.
+ *
+ * Each entry contains:
+ * - key: Visual representation of the keystroke (e.g., "↑ / k", "ctrl+c")
+ * - desc: Brief plain-English description of what the key does
+ *
+ * IMPORTANT: Keep this list in sync with the actual keyboard handler in app.tsx
+ * (useInput hook, lines 203-329). Changes to keybindings must be reflected here.
  */
 const KEYBINDINGS: Array<{ key: string; desc: string }> = [
   { key: '↑ / k',    desc: 'Move up' },
@@ -32,13 +41,19 @@ const maxKeyLen = Math.max(...KEYBINDINGS.map(b => b.key.length));
 /**
  * Renders the help overlay with a complete keybinding reference.
  *
- * Kept as a separate component so the full list of keybindings lives in
- * one place — adding or changing a shortcut only requires editing here,
- * with no risk of the overlay falling out of sync with scattered inline hints.
+ * Displayed when the user presses "?" in navigate mode. The overlay acts
+ * as a modal: any keypress dismisses it (handled by App's useInput hook).
  *
- * "Press any key to close" at the bottom is not handled here — App catches
- * any keypress when showHelp is true and sets it back to false, so this
- * component stays purely presentational.
+ * Architecture:
+ * - This component is purely presentational
+ * - App controls visibility via showHelp state
+ * - Closure is handled in app.tsx (any keypress when showHelp=true)
+ * - Keybindings are defined in KEYBINDINGS constant for easy maintenance
+ *
+ * Layout uses Ink's Box with cyan rounded border and proper padding for
+ * visual separation from the main port list.
+ *
+ * @returns Full-screen help overlay with keybinding table
  */
 export function HelpOverlay() {
   return (
