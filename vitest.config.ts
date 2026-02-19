@@ -9,6 +9,9 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       include: ['src/**/*.ts', 'src/**/*.tsx'],
+      // types.ts contains only type declarations which are erased before runtime;
+      // v8 cannot instrument them, so excluding prevents a misleading 0% entry.
+      exclude: ['src/types.ts'],
     },
   },
 });

@@ -174,6 +174,17 @@ describe('App', () => {
 
   // ─── Kill confirmation ───────────────────────────────────────────────────────
 
+  it('Ctrl+K is a no-op when the port list is empty', async () => {
+    mockGetPorts.mockReturnValue([]);
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    mockKillPort.mockClear();
+    result.stdin.write('\x0B'); // Ctrl+K with no ports — executeKill must return early
+    await tick();
+    expect(mockKillPort).not.toHaveBeenCalled();
+  });
+
   it('Enter on an empty port list is a no-op (no confirmation prompt)', async () => {
     mockGetPorts.mockReturnValue([]);
     const result = render(<App />);
@@ -346,7 +357,16 @@ describe('App', () => {
     expect(result.lastFrame()).toContain('nginx'); // full list visible again
   });
 
-  // ─── q quit ──────────────────────────────────────────────────────────────────
+  // ─── q / Ctrl+C quit ─────────────────────────────────────────────────────────
+
+  it('exits when Ctrl+C is pressed', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('\x03'); // Ctrl+C (byte 0x03 → key.ctrl=true, input='c')
+    await tick();
+    // exit() fires — no error thrown; the frame before exit still contained the UI
+  });
 
   it('exits when q is pressed in navigate mode', async () => {
     const result = render(<App />);
@@ -404,6 +424,21 @@ describe('App', () => {
     expect(result.lastFrame()).toContain('type to filter');
   });
 
+  // ─── Kill confirmation: unrecognised key swallowing ──────────────────────────
+
+  it('swallows unrecognised keys while the confirm kill dialog is active', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('\r'); // open confirm dialog
+    await tick();
+    result.stdin.write('a'); // arbitrary key — not y, n, or ESC
+    await tick();
+    // dialog must still be showing; arbitrary keys are swallowed, not acted upon
+    expect(result.lastFrame()).toContain('Kill');
+    expect(result.lastFrame()).not.toContain('quit'); // not back to navigate hints
+  });
+
   // ─── Ctrl+K direct kill ───────────────────────────────────────────────────────
 
   it('calls killPort directly when Ctrl+K is pressed', async () => {
@@ -413,6 +448,21 @@ describe('App', () => {
     result.stdin.write('\x0B'); // Ctrl+K (character code 11)
     await tick();
     expect(mockKillPort).toHaveBeenCalledWith('100');
+  });
+
+  it('cancels a pending post-kill refresh when a second kill fires before the timer expires', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    mockKillPort.mockClear(); // reset call counter accumulated from previous tests
+    // First Ctrl+K sets killRefreshTimerRef.current to a live timer.
+    // Second Ctrl+K fires before the 300 ms refresh delay elapses,
+    // hitting the `if (killRefreshTimerRef.current !== null) clearTimeout(...)` guard.
+    result.stdin.write('\x0B'); // first kill
+    await tick();
+    result.stdin.write('\x0B'); // second kill — cancels the first pending refresh
+    await tick();
+    expect(mockKillPort).toHaveBeenCalledTimes(2);
   });
 
   // ─── Manual refresh ───────────────────────────────────────────────────────────
