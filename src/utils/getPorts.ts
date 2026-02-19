@@ -1,12 +1,64 @@
+/**
+ * @module getPorts
+ *
+ * Parses `lsof` output to produce a deduplicated list of all TCP ports
+ * currently in the LISTEN state on the local machine.
+ *
+ * **Why `lsof -nP -iTCP -sTCP:LISTEN`?**
+ * - `-n`  Skip DNS reverse lookups. Without this, lsof queries DNS for every
+ *         address it finds, which can add several seconds of latency.
+ * - `-P`  Use numeric port numbers instead of looking up service names in
+ *         /etc/services (e.g. `3000` instead of `hbci`).
+ * - `-iTCP`       Filter to TCP sockets only; ignores UDP, pipes, files, etc.
+ * - `-sTCP:LISTEN` Further filter to sockets in the LISTEN state only;
+ *                  excludes ESTABLISHED, TIME_WAIT, and other transient states.
+ *
+ * **Why a 5-second timeout?**
+ * `lsof` can hang indefinitely when the machine has stale NFS or network
+ * mount points. The timeout ensures the CLI stays responsive even in those
+ * environments. On failure or timeout we return an empty array rather than
+ * crashing.
+ */
 import { execSync } from 'child_process';
 
+/**
+ * Represents a single listening TCP port entry returned by lsof.
+ */
 export interface PortEntry {
+  /** Numeric TCP port number the process is listening on. */
   port: number;
+
+  /**
+   * Process name as reported by lsof (the COMMAND column).
+   * Note: macOS truncates long process names in lsof output; this value
+   * may not be the full executable name.
+   */
   process: string;
+
+  /**
+   * Process ID as a string.
+   * Kept as a string because lsof outputs strings and converting to a number
+   * here would force every callsite to deal with the int — callers that pass
+   * the PID to `killPort()` can pass it through without any conversion.
+   */
   pid: string;
+
+  /**
+   * Normalized IP address the process is bound to.
+   * Wildcard listeners (`*`, `0.0.0.0`, `[::]`, `::`) are all normalized to
+   * `0.0.0.0`. IPv6 loopback (`[::1]`, `::1`) is normalized to `127.0.0.1`.
+   * This gives callers a consistent, display-friendly address string.
+   */
   address: string;
 }
 
+/**
+ * Runs `lsof` and returns a sorted, deduplicated list of listening TCP ports.
+ *
+ * @returns Array of {@link PortEntry} objects sorted by port number ascending.
+ *          Returns an empty array if lsof is unavailable, times out, or
+ *          produces no output.
+ */
 export function getPorts(): PortEntry[] {
   try {
     const output = execSync('lsof -nP -iTCP -sTCP:LISTEN 2>/dev/null', {
@@ -15,7 +67,9 @@ export function getPorts(): PortEntry[] {
     });
 
     const lines = output.trim().split('\n');
-    // Skip header line
+
+    // slice(1) skips the lsof header row:
+    // "COMMAND  PID  USER  FD  TYPE  DEVICE  SIZE/OFF  NODE  NAME"
     const dataLines = lines.slice(1);
 
     const seen = new Set<string>();
@@ -25,13 +79,21 @@ export function getPorts(): PortEntry[] {
       if (!line.trim()) continue;
 
       const parts = line.trim().split(/\s+/);
+
+      // lsof columns (0-indexed):
+      //   0:COMMAND  1:PID  2:USER  3:FD  4:TYPE  5:DEVICE  6:SIZE/OFF  7:NODE  8:NAME
+      // NAME (index 8) holds the address:port string we need to parse.
+      // Any line with fewer than 9 columns is malformed; skip it.
       if (parts.length < 9) continue;
 
       const processName = parts[0];
       const pid = parts[1];
       const addrPort = parts[8];
 
-      // Use lastIndexOf to handle IPv6 addresses like [::1]:3000
+      // Use lastIndexOf instead of indexOf to correctly split IPv6 addresses.
+      // An IPv6 NAME field looks like `[::1]:3000` — the host portion itself
+      // contains colons, so indexOf(':') would land inside the address rather
+      // than at the separator before the port number.
       const lastColon = addrPort.lastIndexOf(':');
       if (lastColon === -1) continue;
 
@@ -40,16 +102,26 @@ export function getPorts(): PortEntry[] {
 
       if (isNaN(port)) continue;
 
-      // Normalize wildcard address variants to 0.0.0.0
+      // Normalize wildcard address variants to 0.0.0.0.
+      // lsof may report wildcard listeners as `*`, `0.0.0.0`, `[::]`, or `::`.
+      // All four mean "listening on all interfaces"; unify them so the UI can
+      // display and deduplicate them consistently.
       let address = rawAddr;
       if (address === '*' || address === '0.0.0.0' || address === '[::]' || address === '::') {
         address = '0.0.0.0';
       }
-      // Normalize IPv6 localhost to 127.0.0.1
+      // Normalize IPv6 loopback to the equivalent IPv4 loopback address.
+      // `[::1]` and `::1` are the IPv6 form of 127.0.0.1; treating them as
+      // identical avoids confusing users who see two "localhost" rows.
       if (address === '[::1]' || address === '::1') {
         address = '127.0.0.1';
       }
 
+      // Deduplicate by address + port + PID.
+      // Many processes (e.g. node, python) bind dual-stack: they open one
+      // socket on `0.0.0.0` (IPv4) and another on `[::]` (IPv6) for the same
+      // port. After normalization both produce the same key, so we only keep
+      // the first row lsof reports rather than showing a duplicate entry.
       const key = `${address}:${port}:${pid}`;
       if (seen.has(key)) continue;
       seen.add(key);

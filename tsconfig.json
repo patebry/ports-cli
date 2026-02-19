@@ -11,5 +11,5 @@
     "rootDir": ".",
     "noEmit": true
   },
-  "include": ["bin", "src"]
+  "include": ["bin", "src", "tests"]
 }
