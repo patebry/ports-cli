@@ -1,0 +1,35 @@
+{
+  "name": "ports-cli",
+  "version": "1.0.0",
+  "description": "Interactive TUI for viewing and killing listening TCP ports",
+  "type": "module",
+  "bin": {
+    "ports": "./dist/ports.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "esbuild bin/ports.js --bundle --platform=node --target=node18 --format=esm --jsx=automatic --loader:.js=jsx --loader:.jsx=jsx --outfile=dist/ports.js --banner:js='#!/usr/bin/env node' --external:react --external:ink --external:ink-text-input && chmod +x dist/ports.js",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "ports",
+    "lsof",
+    "cli",
+    "tui",
+    "network"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "ink": "^4",
+    "ink-text-input": "^5",
+    "react": "^18"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.3"
+  }
+}
