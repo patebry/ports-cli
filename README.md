@@ -2,6 +2,15 @@
 
 An interactive TUI for viewing and killing listening TCP ports on macOS.
 
+## Features
+
+- Real-time port list with 2-second auto-refresh
+- Interactive search/filter with live results
+- Kill processes with optional confirmation
+- Vim-style navigation (j/k)
+- IPv6-aware address normalization
+- Adapts to terminal size
+
 ## Installation
 
 ```sh
@@ -56,9 +65,12 @@ src/
     PortRow.tsx        — single port entry with selection highlight
     StatusBar.tsx      — hints, kill confirmation, kill feedback
     HelpOverlay.tsx    — modal keybinding reference
+  hooks/
+    useKeyboardInput.ts — keyboard event handling for all app modes
   utils/
     getPorts.ts        — lsof invocation, parsing, IPv6 normalization
     killPort.ts        — SIGKILL wrapper with PID validation
+    clampIndex.ts      — selection index bounds clamping
 ```
 
 All application state lives in `App`. Child components are purely presentational.

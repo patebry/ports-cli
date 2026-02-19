@@ -7,7 +7,6 @@
 
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render } from 'ink-testing-library';
-import React from 'react';
 import { Box } from 'ink';
 
 import { useKeyboardInput, type UseKeyboardInputProps } from '../../src/hooks/useKeyboardInput.js';
@@ -186,5 +185,32 @@ describe('useKeyboardInput', () => {
     await tick();
     expect(props.executeKill).not.toHaveBeenCalled();
     expect(props.setConfirmKill).toHaveBeenCalledWith(false);
+  });
+
+  // --- Navigate mode: uppercase R ---
+
+  it('refreshes on uppercase R', async () => {
+    result = render(<TestHarness {...props} />);
+    await tick();
+    result.stdin.write('R');
+    await tick();
+    expect(props.refresh).toHaveBeenCalledTimes(1);
+  });
+
+  // --- Search mode: meta key swallowing ---
+
+  it('swallows meta key combinations in search mode without modifying the query', async () => {
+    result = render(<TestHarness {...props} mode="search" />);
+    await tick();
+    // Cmd+V on macOS sends meta=true — the hook must not append 'v' to the query
+    result.stdin.write('\x1Bv'); // ESC + v is how terminals encode Meta+v / Cmd+V
+    await tick();
+    // setSearchQuery should NOT have been called with a function that appends 'v'.
+    // The only allowed calls are from ESC handling (setSearchQuery('') + setMode('navigate')).
+    // If meta was not swallowed, there would be an extra call appending 'v'.
+    const calls = (props.setSearchQuery as ReturnType<typeof vi.fn>).mock.calls;
+    // Filter out any calls that pass a function (the append call uses q => q + input)
+    const appendCalls = calls.filter((c: unknown[]) => typeof c[0] === 'function');
+    expect(appendCalls).toHaveLength(0);
   });
 });

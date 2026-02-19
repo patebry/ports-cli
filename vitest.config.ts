@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
@@ -12,6 +12,12 @@ export default defineConfig({
       // types.ts contains only type declarations which are erased before runtime;
       // v8 cannot instrument them, so excluding prevents a misleading 0% entry.
       exclude: ['src/types.ts'],
+      thresholds: {
+        statements: 95,
+        branches: 95,
+        functions: 95,
+        lines: 95,
+      },
     },
   },
-});
+})

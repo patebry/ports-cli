@@ -3,6 +3,16 @@
   "version": "1.0.0",
   "description": "Interactive TUI for viewing and killing listening TCP ports",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/patebryant/ports-cli.git"
+  },
+  "author": "patebryant",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/patebryant/ports-cli/issues"
+  },
+  "homepage": "https://github.com/patebryant/ports-cli#readme",
   "bin": {
     "ports": "./dist/ports.js"
   },
@@ -26,7 +36,6 @@
     "tui",
     "network"
   ],
-  "license": "MIT",
   "dependencies": {
     "ink": "^4",
     "react": "^18"

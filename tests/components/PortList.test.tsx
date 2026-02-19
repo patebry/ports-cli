@@ -6,7 +6,6 @@ vi.mock('ink', async (importOriginal) => {
   return { ...actual, useStdout: vi.fn(() => noStdout) };
 });
 
-import React from 'react';
 import { render } from 'ink-testing-library';
 import { useStdout } from 'ink';
 import { PortList } from '../../src/components/PortList.js';

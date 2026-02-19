@@ -8,7 +8,6 @@ vi.mock('../src/utils/killPort.js', () => ({
   killPort: vi.fn(),
 }));
 
-import React from 'react';
 import { render } from 'ink-testing-library';
 
 import { App } from '../src/app.js';
@@ -521,6 +520,65 @@ describe('App', () => {
     const frame = result.lastFrame() ?? '';
     expect(frame).toContain('nod');
     expect(frame).not.toContain('nginx');
+  });
+
+  // ─── Navigation with empty filtered list ──────────────────────────────────
+
+  it('clamps selection when search filter matches nothing', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('/');
+    await tick();
+    result.stdin.write('zzzznotaport'); // matches nothing in PORTS
+    await tick();
+    const frame = result.lastFrame() ?? '';
+    // No port rows should be visible
+    expect(frame).not.toContain('node');
+    expect(frame).not.toContain('nginx');
+    expect(frame).not.toContain('3000');
+    expect(frame).not.toContain('8080');
+    // The empty state message should appear
+    expect(frame).toContain('No listening ports found');
+  });
+
+  it('restores selection to first row after clearing a filter that matched nothing', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('j'); // move to index 1 (nginx)
+    await tick();
+    result.stdin.write('/');
+    await tick();
+    result.stdin.write('zzzznotaport'); // matches nothing — selectedIndex clamped to 0
+    await tick();
+    result.stdin.write('\x1B'); // ESC — clear filter, back to navigate, full list
+    await tick();
+    // After clearing, clampedIndex should be 0 (clamped from the empty-list phase)
+    // so the selection arrow should land on 'node' (first row)
+    const frame = result.lastFrame() ?? '';
+    expect(frame).toContain('▶');
+    const arrowPos = frame.indexOf('▶');
+    expect(frame.substring(arrowPos)).toContain('node');
+  });
+
+  it('j and k are no-ops when the filtered list is empty', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('/');
+    await tick();
+    result.stdin.write('zzzznotaport'); // matches nothing
+    await tick();
+    result.stdin.write('\r'); // Enter — commit filter, back to navigate
+    await tick();
+    result.stdin.write('j'); // down on empty filtered list
+    await tick();
+    result.stdin.write('k'); // up on empty filtered list
+    await tick();
+    // Should not crash; still shows empty state
+    const frame = result.lastFrame() ?? '';
+    expect(frame).toContain('No listening ports found');
   });
 });
 
