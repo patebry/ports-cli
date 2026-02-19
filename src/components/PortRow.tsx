@@ -87,4 +87,3 @@ export function PortRow({ port, isSelected, colProcess }: PortRowProps) {
     </Box>
   );
 }
-

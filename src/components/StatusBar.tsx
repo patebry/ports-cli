@@ -8,7 +8,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import { PortEntry } from '../utils/getPorts.js';
-import type { AppMode, KillMessage } from '../app.js';
+import type { AppMode, KillMessage } from '../types.js';
 
 /**
  * Props for the StatusBar component.
@@ -20,6 +20,11 @@ interface StatusBarProps {
    * Whether the app is waiting for the user to confirm a kill action.
    * When true, the entire status bar is replaced with the confirmation prompt —
    * this is the highest-priority display state.
+   *
+   * **Invariant:** `confirmKill === true` must only be passed when `selectedPort`
+   * is non-null. App enforces this at the call-site (`if (selectedPort) setConfirmKill(true)`).
+   * Passing `confirmKill={true}` with `selectedPort={null}` is a programmer error
+   * and will silently render nothing for the confirmation prompt.
    */
   confirmKill: boolean;
   /**

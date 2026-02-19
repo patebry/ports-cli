@@ -426,4 +426,25 @@ describe('App', () => {
     await tick();
     expect(mockGetPorts).toHaveBeenCalledTimes(1);
   });
+
+  it('calls getPorts again when R is pressed', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    mockGetPorts.mockClear();
+    result.stdin.write('R');
+    await tick();
+    expect(mockGetPorts).toHaveBeenCalledTimes(1);
+  });
+
+  it('moves selection down with down arrow in navigate mode', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('\x1B[B'); // down arrow escape sequence
+    await tick();
+    const frame = result.lastFrame() ?? '';
+    const arrowPos = frame.indexOf('▶');
+    expect(frame.substring(arrowPos)).toContain('nginx');
+  });
 });

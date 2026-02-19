@@ -27,26 +27,9 @@ import { StatusBar } from './components/StatusBar.js';
 import { HelpOverlay } from './components/HelpOverlay.js';
 import { getPorts, PortEntry } from './utils/getPorts.js';
 import { killPort } from './utils/killPort.js';
+import type { AppMode, KillMessage } from './types.js';
 
-/**
- * The two interaction modes the app can be in at any time.
- * - `'navigate'` — default mode; keyboard controls move the list selection
- * - `'search'`   — entered via `/`; printable keystrokes are appended to
- *                  searchQuery and filter the visible port list in real time
- */
-export type AppMode = 'navigate' | 'search';
-
-/**
- * Transient feedback message displayed in the StatusBar after a kill attempt.
- * Auto-clears after 2 seconds via a useEffect timer.
- *
- * @property type - `'success'` renders green; `'error'` renders red
- * @property text - Human-readable description, e.g. "Killed nginx (1234)" or "Failed: EPERM"
- */
-export interface KillMessage {
-  type: 'success' | 'error';
-  text: string;
-}
+export type { AppMode, KillMessage };
 
 export function App() {
   const { exit } = useApp();

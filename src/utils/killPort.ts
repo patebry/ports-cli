@@ -21,17 +21,15 @@ import { execSync } from 'child_process';
 
 /**
  * The result of a kill attempt.
+ *
+ * Modelled as a discriminated union so the compiler guarantees that
+ * `error` is present when `success` is `false` and absent when `success`
+ * is `true`. This makes it impossible to represent an inconsistent state
+ * such as `{ success: true, error: "..." }`.
  */
-export interface KillResult {
-  /** `true` if the kill command executed without error; `false` otherwise. */
-  success: boolean;
-
-  /**
-   * Human-readable error message from the OS or from PID validation.
-   * Only present when `success` is `false`.
-   */
-  error?: string;
-}
+export type KillResult =
+  | { success: true }
+  | { success: false; error: string };
 
 /**
  * Sends SIGKILL to the process identified by `pid`.
