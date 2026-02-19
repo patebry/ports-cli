@@ -89,10 +89,11 @@ export function App({ _killMessageTimeoutMs = KILL_MESSAGE_TIMEOUT_MS }: AppProp
    * Matches against `process` name, `port` number (cast to string), and `address`.
    * Case-insensitive. Returns the full list when searchQuery is empty.
    */
+  const query = searchQuery.toLowerCase();
   const filteredPorts = ports.filter(p =>
     !searchQuery ||
     [p.process, String(p.port), p.address].some(v =>
-      v.toLowerCase().includes(searchQuery.toLowerCase())
+      v.toLowerCase().includes(query)
     )
   );
 
@@ -135,7 +136,7 @@ export function App({ _killMessageTimeoutMs = KILL_MESSAGE_TIMEOUT_MS }: AppProp
     if (!killMessage) return;
     const timer = setTimeout(() => setKillMessage(null), _killMessageTimeoutMs);
     return () => clearTimeout(timer);
-  }, [killMessage]);
+  }, [killMessage, _killMessageTimeoutMs]);
 
   /** Re-fetches the port list from lsof and updates state immediately. */
   const refresh = () => setPorts(getPorts());
@@ -201,7 +202,6 @@ export function App({ _killMessageTimeoutMs = KILL_MESSAGE_TIMEOUT_MS }: AppProp
     confirmKill,
     searchQuery,
     selectedPort,
-    filteredPortsLength: filteredPorts.length,
     exit,
     executeKill,
     toggleHelp: () => setShowHelp(s => !s),

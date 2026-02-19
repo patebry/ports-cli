@@ -27,9 +27,6 @@ export interface UseKeyboardInputProps {
   /** Currently selected port entry (null if list is empty). */
   selectedPort: PortEntry | null;
 
-  /** Number of items in the filtered ports list (for boundary clamping). */
-  filteredPortsLength: number;
-
   // --- Action callbacks (all state mutations delegated to parent) ---
 
   /** Exit the application. */
@@ -73,11 +70,11 @@ export interface UseKeyboardInputProps {
  * 4. Navigate mode bindings
  * 5. Search mode bindings
  *
- * This hook is a pure extraction of the useInput logic from app.tsx (lines 203-329).
- * It delegates all state mutations back to the parent via callbacks, maintaining
- * the single-source-of-truth state architecture.
+ * This hook was extracted from app.tsx into its own module. It delegates all
+ * state mutations back to the parent via callbacks, maintaining the
+ * single-source-of-truth state architecture.
  */
-export function useKeyboardInput(props: UseKeyboardInputProps) {
+export function useKeyboardInput(props: UseKeyboardInputProps): void {
   const {
     mode,
     showHelp,

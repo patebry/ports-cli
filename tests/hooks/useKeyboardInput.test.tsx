@@ -30,7 +30,6 @@ describe('useKeyboardInput', () => {
       confirmKill: false,
       searchQuery: '',
       selectedPort: { port: 3000, process: 'node', pid: '100', user: 'test', address: '127.0.0.1' },
-      filteredPortsLength: 2,
       exit: vi.fn(),
       executeKill: vi.fn(),
       toggleHelp: vi.fn(),

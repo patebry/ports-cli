@@ -17,6 +17,14 @@ const portB: PortEntry = { port: 8080, process: 'python', pid: '22222', user: 'b
 const portC: PortEntry = { port: 5432, process: 'postgres', pid: '33333', user: 'root', address: '127.0.0.1' };
 
 describe('PortList', () => {
+  afterEach(() => {
+    vi.mocked(useStdout).mockReset();
+    vi.mocked(useStdout).mockReturnValue({
+      stdout: undefined as unknown as NodeJS.WriteStream,
+      write: () => {},
+    });
+  });
+
   describe('empty state', () => {
     it('renders "No listening ports found." when ports array is empty', () => {
       const { lastFrame } = render(<PortList ports={[]} selectedIndex={0} />);
@@ -100,14 +108,6 @@ describe('PortList', () => {
   });
 
   describe('terminal width adaptation', () => {
-    afterEach(() => {
-      vi.mocked(useStdout).mockReset();
-      vi.mocked(useStdout).mockReturnValue({
-        stdout: undefined as unknown as NodeJS.WriteStream,
-        write: () => {},
-      });
-    });
-
     it('uses stdout.columns when available to compute process column width', () => {
       // Provide a real terminal width so the stdout?.columns branch is taken.
       vi.mocked(useStdout).mockReturnValue({
@@ -137,14 +137,6 @@ describe('PortList', () => {
   });
 
   describe('viewport scrolling for limited terminal height', () => {
-    afterEach(() => {
-      vi.mocked(useStdout).mockReset();
-      vi.mocked(useStdout).mockReturnValue({
-        stdout: undefined as unknown as NodeJS.WriteStream,
-        write: () => {},
-      });
-    });
-
     it('renders all ports when they fit within terminal height', () => {
       // Terminal with 20 rows can show 14 ports (20 - 6 overhead)
       vi.mocked(useStdout).mockReturnValue({

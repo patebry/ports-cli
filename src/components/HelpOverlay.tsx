@@ -20,8 +20,8 @@ import { Box, Text } from 'ink';
  * - key: Visual representation of the keystroke (e.g., "↑ / k", "ctrl+c")
  * - desc: Brief plain-English description of what the key does
  *
- * IMPORTANT: Keep this list in sync with the actual keyboard handler in app.tsx
- * (useInput hook, lines 203-329). Changes to keybindings must be reflected here.
+ * IMPORTANT: Keep this list in sync with the actual keyboard handler in
+ * src/hooks/useKeyboardInput.ts. Changes to keybindings must be reflected here.
  */
 const KEYBINDINGS: Array<{ key: string; desc: string }> = [
   { key: '↑ / k',    desc: 'Move up' },
