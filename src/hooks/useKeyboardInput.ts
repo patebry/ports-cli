@@ -4,7 +4,7 @@
  * Custom hook that encapsulates all keyboard input handling for the ports-cli TUI.
  */
 
-import React from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { useInput } from 'ink';
 
 import type { AppMode, PortEntry } from '../types.js';
@@ -49,7 +49,7 @@ export interface UseKeyboardInputProps {
   setMode: (mode: AppMode) => void;
 
   /** Set the search query string. */
-  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+  setSearchQuery: Dispatch<SetStateAction<string>>;
 
   /** Move selection up one row. */
   moveUp: () => void;

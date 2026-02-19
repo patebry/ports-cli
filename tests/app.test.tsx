@@ -445,6 +445,20 @@ describe('App', () => {
     expect(result.lastFrame()).not.toContain('quit'); // not back to navigate hints
   });
 
+  it('does not toggle the help overlay when ? is pressed during confirmKill', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('\r'); // open confirm dialog
+    await tick();
+    result.stdin.write('?'); // should be swallowed, not toggle help
+    await tick();
+    // Help overlay must NOT appear
+    expect(result.lastFrame()).not.toContain('Keybindings');
+    // Kill confirmation must still be showing
+    expect(result.lastFrame()).toContain('Kill');
+  });
+
   // ─── Ctrl+K direct kill ───────────────────────────────────────────────────────
 
   it('calls killPort directly when Ctrl+K is pressed', async () => {

@@ -14,9 +14,9 @@
  *   navigate. Arrow keys still work so the user can refine selection while typing.
  *
  * Data flow:
- *   lsof (every 2s) → ports[] → filteredPorts[] → PortList + StatusBar
- *                                                ↑
- *                                         searchQuery (user input)
+ *   lsof (every 2s) -> ports[] -> filteredPorts[] -> PortList + StatusBar
+ *                                                  ^
+ *                                           searchQuery (user input)
  */
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -182,14 +182,14 @@ export function App({ _killMessageTimeoutMs = KILL_MESSAGE_TIMEOUT_MS }: AppProp
   }, []);
 
   /** Move cursor up one row, clamped to index 0. */
-  function moveUp() {
+  const moveUp = () => {
     setSelectedIndex(i => clampIndex(i - 1, filteredPorts.length - 1));
-  }
+  };
 
   /** Move cursor down one row, clamped to last row of filteredPorts. */
-  function moveDown() {
+  const moveDown = () => {
     setSelectedIndex(i => clampIndex(i + 1, filteredPorts.length - 1));
-  }
+  };
 
   /**
    * Keyboard input handler. Extracted to custom hook for clarity and testability.

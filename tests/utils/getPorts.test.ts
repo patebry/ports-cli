@@ -302,4 +302,18 @@ describe('getPorts', () => {
       address: '0.0.0.0',
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // 15. execSync is called with LSOF_TIMEOUT_MS (5000)
+  // ---------------------------------------------------------------------------
+  it('passes timeout: 5000 to execSync', () => {
+    mockExecSync.mockReturnValue(HEADER + '\n');
+
+    getPorts();
+
+    expect(mockExecSync).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ timeout: 5000 }),
+    );
+  });
 });
