@@ -12,11 +12,13 @@ import { Box, Text } from 'ink';
 import { PortEntry } from '../utils/getPorts.js';
 
 /**
- * Fixed character widths for PORT and PID columns. These are stable regardless
- * of terminal size: port numbers top out at 5 digits and PIDs at 7.
+ * Fixed character widths for PORT, PID, and USER columns. These are stable
+ * regardless of terminal size: port numbers top out at 5 digits, PIDs at 7,
+ * and macOS usernames are typically well under 14 characters.
  */
 const COL_PORT = 8;
 const COL_PID = 8;
+const COL_USER = 14;
 
 /**
  * Props for the PortRow component.
@@ -49,6 +51,7 @@ export function PortRow({ port, isSelected, colProcess }: PortRowProps) {
   // into the next column. colProcess is computed dynamically by PortList based
   // on the current terminal width, so this truncation point grows with the window.
   const processStr = port.process.slice(0, colProcess).padEnd(colProcess);
+  const userStr = port.user.slice(0, COL_USER).padEnd(COL_USER);
   const pidStr = String(port.pid).padEnd(COL_PID);
   const addressStr = port.address;
 
@@ -66,6 +69,7 @@ export function PortRow({ port, isSelected, colProcess }: PortRowProps) {
         <Text color="cyan">{'▶ '}</Text>
         <Text color="cyan">{portStr}</Text>
         <Text color="cyan">{processStr}</Text>
+        <Text color="cyan">{userStr}</Text>
         <Text color="cyan">{pidStr}</Text>
         <Text color="cyan">{addressStr}</Text>
       </Box>
@@ -77,10 +81,11 @@ export function PortRow({ port, isSelected, colProcess }: PortRowProps) {
       <Text>{'  '}</Text>
       <Text>{portStr}</Text>
       <Text>{processStr}</Text>
+      <Text dimColor>{userStr}</Text>
       <Text>{pidStr}</Text>
       <Text dimColor>{addressStr}</Text>
     </Box>
   );
 }
 
-export { COL_PORT, COL_PID };
+export { COL_PORT, COL_PID, COL_USER };

@@ -21,7 +21,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Box, useInput, useApp } from 'ink';
-import { Header } from './components/Header.js';
 import { SearchBar } from './components/SearchBar.js';
 import { PortList } from './components/PortList.js';
 import { StatusBar } from './components/StatusBar.js';
@@ -311,15 +310,13 @@ export function App() {
 
   /**
    * Component tree (top to bottom, column flex layout):
-   *   Header      — app title bar (static)
-   *   SearchBar   — filter input; isActive controls whether TextInput captures chars
+   *   SearchBar   — app title + filter input on one line
    *   PortList    — scrollable table of filteredPorts with the selected row highlighted
    *   StatusBar   — context-sensitive footer: mode indicator, kill confirm, kill message
    *   HelpOverlay — full-screen modal rendered on top when showHelp is true
    */
   return (
     <Box flexDirection="column">
-      <Header />
       <SearchBar value={searchQuery} isActive={mode === 'search'} />
       <PortList ports={filteredPorts} selectedIndex={clampedIndex} />
       <StatusBar mode={mode} confirmKill={confirmKill} killMessage={killMessage} selectedPort={selectedPort} />

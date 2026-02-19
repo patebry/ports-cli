@@ -20,38 +20,28 @@ interface SearchBarProps {
 }
 
 /**
- * Renders the search/filter bar below the header.
+ * Renders a single-line title + search bar.
  *
- * Provides three distinct visual states so the user always knows the filter
- * status at a glance without needing to read text:
- * - **Active + value**: cyan border, shows typed text with a simulated cursor
- * - **Active + empty**: cyan border, shows a dimmed placeholder hint with cursor
- * - **Inactive + value**: yellow border, shows the active filter in yellow text
- * - **Inactive + empty**: gray border, shows a dimmed "to search" hint
+ * Combines the app name with the filter state so both fit on one row,
+ * saving the vertical space the old bordered Header + bordered SearchBar used.
+ *
+ * Visual states for the search portion:
+ * - **Active + value**: cyan "/" and typed text with a simulated cursor
+ * - **Active + empty**: cyan "/", dimmed placeholder, cursor
+ * - **Inactive + value**: yellow "/" and value — signals an active filter
+ * - **Inactive + empty**: gray "/", dimmed "to search" hint
  */
 export function SearchBar({ value, isActive }: SearchBarProps) {
   return (
-    // Three-state border color communicates filter status at a glance:
-    //   cyan   — search mode is active; the user is currently typing
-    //   yellow — a filter is applied but focus has returned to navigate mode
-    //   gray   — no filter set, search mode inactive
-    <Box borderStyle="single" borderColor={isActive ? 'cyan' : value ? 'yellow' : 'gray'} paddingX={1}>
-      <Text color={isActive ? 'cyan' : 'gray'}>{'/ '}</Text>
+    <Box borderStyle="round" borderColor={isActive ? 'cyan' : value ? 'yellow' : 'gray'} paddingX={1}>
+      <Text bold color="cyan">ports</Text>
+      <Text color={isActive ? 'cyan' : value ? 'yellow' : 'gray'}>{'  / '}</Text>
       {isActive
         ? value
-          // Active with text: render the typed value followed by a block cursor.
-          // Ink does not expose a real terminal text cursor, so the "█" character
-          // manually simulates one. Coloring it cyan makes it visually distinct
-          // from the typed text.
           ? <Text>{value}<Text color="cyan">█</Text></Text>
-          // Active but empty: show the placeholder hint so the user knows what to do,
-          // with the cursor to confirm input focus is here.
           : <Text dimColor>type to filter...<Text color="cyan">█</Text></Text>
         : value
-          // Inactive with a filter value: yellow text signals an active filter is
-          // narrowing the list even though search mode is not focused.
           ? <Text color="yellow">{value}</Text>
-          // Inactive and empty: minimal hint so the user knows "/" opens search.
           : <Text dimColor>to search</Text>
       }
     </Box>

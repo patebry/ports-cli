@@ -8,6 +8,7 @@ const samplePort: PortEntry = {
   port: 3000,
   process: 'node',
   pid: '12345',
+  user: 'patebryant',
   address: '127.0.0.1',
 };
 
@@ -32,6 +33,11 @@ describe('PortRow', () => {
     it('renders the pid', () => {
       const { lastFrame } = renderRow(samplePort, false);
       expect(lastFrame()).toContain('12345');
+    });
+
+    it('renders the user', () => {
+      const { lastFrame } = renderRow(samplePort, false);
+      expect(lastFrame()).toContain('patebryant');
     });
 
     it('renders the address', () => {
@@ -59,6 +65,11 @@ describe('PortRow', () => {
     it('renders the process name', () => {
       const { lastFrame } = renderRow(samplePort, true);
       expect(lastFrame()).toContain('node');
+    });
+
+    it('renders the user', () => {
+      const { lastFrame } = renderRow(samplePort, true);
+      expect(lastFrame()).toContain('patebryant');
     });
 
     it('renders the pid', () => {

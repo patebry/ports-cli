@@ -7,7 +7,7 @@
 import React from 'react';
 import { Box, Text, useStdout } from 'ink';
 import { PortEntry } from '../utils/getPorts.js';
-import { PortRow, COL_PORT, COL_PID } from './PortRow.js';
+import { PortRow, COL_PORT, COL_PID, COL_USER } from './PortRow.js';
 
 /**
  * Props for the PortList component.
@@ -29,15 +29,16 @@ interface PortListProps {
  */
 export function PortList({ ports, selectedIndex }: PortListProps) {
   const { stdout } = useStdout();
-  // Reserve space for the row prefix (2), PORT, PID, and a ~20-char ADDRESS
-  // column at the end. Whatever remains goes to PROCESS so it expands naturally
-  // on wider terminals instead of truncating at a fixed character limit.
-  const colProcess = Math.min(40, Math.max(16, (stdout?.columns ?? 80) - 2 - COL_PORT - COL_PID - 20));
+  // Reserve space for the row prefix (2), PORT, USER, PID, and a ~20-char
+  // ADDRESS column at the end. Whatever remains goes to PROCESS so it expands
+  // naturally on wider terminals instead of truncating at a fixed character limit.
+  const colProcess = Math.min(40, Math.max(16, (stdout?.columns ?? 80) - 2 - COL_PORT - COL_USER - COL_PID - 20));
 
   // Headers use the same widths as PortRow so column labels always sit
   // directly above their corresponding data values.
   const portHeader = 'PORT'.padEnd(COL_PORT);
   const processHeader = 'PROCESS'.padEnd(colProcess);
+  const userHeader = 'USER'.padEnd(COL_USER);
   const pidHeader = 'PID'.padEnd(COL_PID);
 
   return (
@@ -46,6 +47,7 @@ export function PortList({ ports, selectedIndex }: PortListProps) {
         <Text>{'  '}</Text>
         <Text bold color="gray">{portHeader}</Text>
         <Text bold color="gray">{processHeader}</Text>
+        <Text bold color="gray">{userHeader}</Text>
         <Text bold color="gray">{pidHeader}</Text>
         <Text bold color="gray">ADDRESS</Text>
       </Box>

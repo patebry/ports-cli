@@ -18,8 +18,8 @@ const mockGetPorts = vi.mocked(getPorts);
 const mockKillPort = vi.mocked(killPort);
 
 const PORTS = [
-  { port: 3000, process: 'node', pid: '100', address: '127.0.0.1' },
-  { port: 8080, process: 'nginx', pid: '200', address: '0.0.0.0' },
+  { port: 3000, process: 'node', pid: '100', user: 'patebryant', address: '127.0.0.1' },
+  { port: 8080, process: 'nginx', pid: '200', user: 'root', address: '0.0.0.0' },
 ];
 
 /**

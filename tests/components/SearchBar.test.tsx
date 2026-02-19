@@ -4,6 +4,11 @@ import { render } from 'ink-testing-library';
 import { SearchBar } from '../../src/components/SearchBar.js';
 
 describe('SearchBar', () => {
+  it('always renders the app name "ports"', () => {
+    const { lastFrame } = render(<SearchBar value="" isActive={false} />);
+    expect(lastFrame()).toContain('ports');
+  });
+
   it('inactive with no value renders "to search" hint text', () => {
     const { lastFrame } = render(<SearchBar value="" isActive={false} />);
     expect(lastFrame()).toContain('to search');

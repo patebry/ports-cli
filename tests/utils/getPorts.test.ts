@@ -50,7 +50,7 @@ describe('getPorts', () => {
     mockExecSync.mockReturnValue(output);
 
     expect(getPorts()).toEqual([
-      { port: 3000, process: 'node', pid: '12345', address: '127.0.0.1' },
+      { port: 3000, process: 'node', pid: '12345', user: 'user', address: '127.0.0.1' },
     ]);
   });
 
@@ -215,7 +215,7 @@ describe('getPorts', () => {
     mockExecSync.mockReturnValue(output);
 
     expect(getPorts()).toEqual([
-      { port: 3000, process: 'node', pid: '12345', address: '127.0.0.1' },
+      { port: 3000, process: 'node', pid: '12345', user: 'user', address: '127.0.0.1' },
     ]);
   });
 });

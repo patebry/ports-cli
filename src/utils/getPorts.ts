@@ -52,6 +52,9 @@ export interface PortEntry {
    * This gives callers a consistent, display-friendly address string.
    */
   address: string;
+
+  /** OS user account that owns the process, as reported by lsof's USER column. */
+  user: string;
 }
 
 /**
@@ -92,6 +95,7 @@ export function getPorts(): PortEntry[] {
 
       const processName = parts[0];
       const pid = parts[1];
+      const user = parts[2];
       const addrPort = parts[8];
 
       // Use lastIndexOf instead of indexOf to correctly split IPv6 addresses.
@@ -134,6 +138,7 @@ export function getPorts(): PortEntry[] {
         port,
         process: processName,
         pid,
+        user,
         address,
       });
     }
