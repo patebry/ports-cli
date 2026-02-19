@@ -29,8 +29,6 @@ import { getPorts } from './utils/getPorts.js';
 import { killPort } from './utils/killPort.js';
 import type { AppMode, KillMessage, PortEntry } from './types.js';
 
-export type { AppMode, KillMessage };
-
 /** Milliseconds between automatic lsof polls. */
 const AUTO_REFRESH_INTERVAL_MS = 2000;
 /** Milliseconds a kill success/error message remains visible in the StatusBar. */
@@ -38,7 +36,12 @@ const KILL_MESSAGE_TIMEOUT_MS = 2000;
 /** Milliseconds to wait after a kill before re-polling lsof, giving the process time to exit. */
 const POST_KILL_REFRESH_DELAY_MS = 300;
 
-export function App() {
+interface AppProps {
+  /** Override for kill message timeout (ms). For testing only. @internal */
+  _killMessageTimeoutMs?: number;
+}
+
+export function App({ _killMessageTimeoutMs = KILL_MESSAGE_TIMEOUT_MS }: AppProps = {}) {
   const { exit } = useApp();
 
   /** Master list of listening TCP ports from lsof. Refreshed every 2 seconds by the auto-refresh effect. */
@@ -95,10 +98,13 @@ export function App() {
    * A safe read index for `filteredPorts`.
    * `selectedIndex` is persisted state and can lag behind list length changes (e.g.
    * when a filter narrows the list, or when a killed process disappears on refresh).
-   * `Math.max(0, filteredPorts.length - 1)` ensures we return 0 rather than -1
-   * when the list is empty, so downstream code never sees an out-of-bounds index.
+   * Both bounds are applied: `Math.max(0, selectedIndex)` prevents a negative index
+   * (which can occur if the user presses ↓/j on an empty list, since the setter uses
+   * `Math.min(length - 1, i + 1)` = -1 when length is 0), and
+   * `Math.max(0, filteredPorts.length - 1)` caps the upper bound so the index never
+   * exceeds the last valid position when the list shrinks.
    */
-  const clampedIndex = Math.min(selectedIndex, Math.max(0, filteredPorts.length - 1));
+  const clampedIndex = Math.min(Math.max(0, selectedIndex), Math.max(0, filteredPorts.length - 1));
 
   /**
    * The port entry currently highlighted in the list, or null when the list is empty.
@@ -129,7 +135,7 @@ export function App() {
    */
   useEffect(() => {
     if (!killMessage) return;
-    const timer = setTimeout(() => setKillMessage(null), KILL_MESSAGE_TIMEOUT_MS);
+    const timer = setTimeout(() => setKillMessage(null), _killMessageTimeoutMs);
     return () => clearTimeout(timer);
   }, [killMessage]);
 
@@ -175,6 +181,11 @@ export function App() {
   useEffect(() => () => {
     if (killRefreshTimerRef.current !== null) clearTimeout(killRefreshTimerRef.current);
   }, []);
+
+  /** Move cursor up one row, clamped to index 0. */
+  function moveUp() { setSelectedIndex(i => Math.max(0, i - 1)); }
+  /** Move cursor down one row, clamped to last row of filteredPorts. */
+  function moveDown() { setSelectedIndex(i => Math.min(filteredPorts.length - 1, i + 1)); }
 
   /**
    * Central keyboard handler. Ink calls this for EVERY keypress regardless of which
@@ -237,12 +248,12 @@ export function App() {
     if (mode === 'navigate') {
       // Up arrow / k — move selection up, clamped at top of list
       if (key.upArrow || input === 'k') {
-        setSelectedIndex(i => Math.max(0, i - 1));
+        moveUp();
         return;
       }
       // Down arrow / j — move selection down, clamped at bottom of list
       if (key.downArrow || input === 'j') {
-        setSelectedIndex(i => Math.min(filteredPorts.length - 1, i + 1));
+        moveDown();
         return;
       }
       // `/` — enter search mode; cursor moves to SearchBar and subsequent printable
@@ -293,12 +304,12 @@ export function App() {
       // Up arrow — move selection up while staying in search mode so the user can
       // refine which result they want without leaving the search field
       if (key.upArrow) {
-        setSelectedIndex(i => Math.max(0, i - 1));
+        moveUp();
         return;
       }
       // Down arrow — same as above but downward
       if (key.downArrow) {
-        setSelectedIndex(i => Math.min(filteredPorts.length - 1, i + 1));
+        moveDown();
         return;
       }
       // Enter — commit the current filter and return to navigate mode.

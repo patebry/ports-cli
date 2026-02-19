@@ -329,6 +329,28 @@ describe('App', () => {
     expect(frame.substring(arrowPos)).toContain('node');
   });
 
+  // ─── Empty-list navigation guard ─────────────────────────────────────────────
+
+  it('pressing j on an empty list does not leave selectedIndex at -1 after list repopulates', async () => {
+    mockGetPorts.mockReturnValue([]);
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('j'); // press down on empty list — setter would write Math.min(-1,1)=-1
+    await tick();
+    // Now repopulate the list — clampedIndex must not stay at -1 (which would make
+    // selectedPort null even with items present). The Math.max(0, selectedIndex)
+    // floor in clampedIndex ensures the sync effect corrects selectedIndex to 0.
+    mockGetPorts.mockReturnValue(PORTS);
+    result.stdin.write('r'); // manual refresh
+    await tick();
+    // Arrow should now appear on node (first row), not be absent entirely
+    const frame = result.lastFrame() ?? '';
+    expect(frame).toContain('▶');
+    const arrowPos = frame.indexOf('▶');
+    expect(frame.substring(arrowPos)).toContain('node');
+  });
+
   // ─── Navigate-mode ESC clear ─────────────────────────────────────────────────
 
   it('ESC in navigate mode with no active filter is a no-op', async () => {
@@ -518,21 +540,39 @@ describe('App', () => {
 });
 
 // --- kill message auto-clear ---
-// NOTE: vi.useFakeTimers() cannot be used here alongside the existing test
-// infrastructure. The tick() helper relies on real setTimeout (10 ms delay)
-// to let useInput's useEffect register the stdin 'readable' listener before
-// stdin.write() calls. Activating fake timers globally prevents the React
-// scheduler (MessageChannel / setTimeout) from flushing, which breaks the
-// stdin simulation pattern used by every other test in this file.
-//
-// The KILL_MESSAGE_TIMEOUT_MS = 2000 auto-clear behaviour is instead covered
-// implicitly: the success message IS visible immediately after a kill (tested
-// in 'shows a success message after a successful kill'), and the 2-second
-// setTimeout callback sets killMessage back to null -- a straightforward
-// React setState call that is trivially correct once the timer fires.
-// A reliable end-to-end fake-timer test would require refactoring the whole
-// file to use vi.useFakeTimers() from the start, which is out of scope here.
 describe('kill message auto-clear', () => {
-  it.todo('clears kill message after KILL_MESSAGE_TIMEOUT_MS -- requires fake timer refactor');
+  let unmount: (() => void) | undefined;
+
+  afterEach(() => {
+    unmount?.();
+    unmount = undefined;
+  });
+
+  it('clears kill message after KILL_MESSAGE_TIMEOUT_MS', async () => {
+    // Use a short timeout value for testing (50ms instead of 2000ms)
+    const TEST_TIMEOUT = 50;
+    mockGetPorts.mockReturnValue(PORTS);
+
+    const result = render(<App _killMessageTimeoutMs={TEST_TIMEOUT} />);
+    unmount = result.unmount;
+    await tick();
+
+    // Select node, press Enter, confirm kill
+    result.stdin.write('\r');
+    await tick();
+    result.stdin.write('y');
+    await tick();
+
+    // Kill message should appear immediately
+    let frame = result.lastFrame() ?? '';
+    expect(frame).toContain('Killed');
+
+    // Wait for timeout + buffer to ensure message clears
+    await new Promise(resolve => setTimeout(resolve, TEST_TIMEOUT + 30));
+
+    // Message should be cleared now
+    frame = result.lastFrame() ?? '';
+    expect(frame).not.toContain('Killed');
+  });
 });
 

@@ -97,7 +97,10 @@ describe('getPorts', () => {
   });
 
   it('normalizes :: to 0.0.0.0', () => {
-    // lsof can emit ":::6000" meaning host "::" port 6000
+    // lsof emits ":::6000" for a wildcard IPv6 listener: the host portion is "::"
+    // and lastIndexOf(':') correctly splits it into rawAddr="::" and port=6000.
+    // This test exercises the `address === '::'` branch in the normalization logic —
+    // there is no separate "bare ::" format gap; this case is the only reachable path.
     mockExecSync.mockReturnValue([HEADER, makeLine('app', '4', 'u', ':::6000')].join('\n'));
     const [entry] = getPorts();
     expect(entry.address).toBe('0.0.0.0');

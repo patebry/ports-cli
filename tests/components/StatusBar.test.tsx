@@ -115,6 +115,20 @@ describe('StatusBar', () => {
       );
       expect(lastFrame()).toContain('ESC');
     });
+
+    it('renders the "confirm" action label next to the y key', () => {
+      const { lastFrame } = render(
+        <StatusBar mode="navigate" confirmKill={true} killMessage={null} selectedPort={samplePort} />
+      );
+      expect(lastFrame()).toContain('confirm');
+    });
+
+    it('renders the "cancel" action label next to the ESC key', () => {
+      const { lastFrame } = render(
+        <StatusBar mode="navigate" confirmKill={true} killMessage={null} selectedPort={samplePort} />
+      );
+      expect(lastFrame()).toContain('cancel');
+    });
   });
 
   describe('kill messages', () => {

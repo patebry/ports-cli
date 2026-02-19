@@ -21,6 +21,16 @@ export const COL_USER = 14;
 const SELECTION_ARROW = '▶ ';
 
 /**
+ * Box with backgroundColor support. Ink's BoxProps type definition does not
+ * include backgroundColor, but it is supported at runtime by Ink's yoga renderer.
+ * Applied to Box (not Text) so the highlight covers the full row width rather
+ * than only the text content.
+ */
+const HighlightBox = Box as React.ComponentType<
+  React.ComponentProps<typeof Box> & { backgroundColor?: string }
+>;
+
+/**
  * Props for the PortRow component.
  */
 interface PortRowProps {
@@ -57,12 +67,7 @@ export function PortRow({ port, isSelected, colProcess }: PortRowProps) {
 
   if (isSelected) {
     return (
-      // @ts-expect-error — Ink's BoxProps is a `type` alias (Except<Styles, 'textWrap'>)
-      // so it cannot be extended via module augmentation. `backgroundColor` is
-      // supported at runtime by Ink's yoga renderer but absent from the type
-      // definitions. Applied to Box (not Text) so the highlight covers the full
-      // row width rather than only the text content.
-      <Box backgroundColor="blue">
+      <HighlightBox backgroundColor="blue">
         {/* "▶" provides an unambiguous visual marker of the current selection
             position — more scannable than background color alone. */}
         <Text color="cyan">{SELECTION_ARROW}</Text>
@@ -71,7 +76,7 @@ export function PortRow({ port, isSelected, colProcess }: PortRowProps) {
         <Text color="cyan">{userStr}</Text>
         <Text color="cyan">{pidStr}</Text>
         <Text color="cyan">{addressStr}</Text>
-      </Box>
+      </HighlightBox>
     );
   }
 
