@@ -8,23 +8,14 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import { PortEntry } from '../utils/getPorts.js';
-
-/**
- * Represents the result of a kill attempt, shown briefly after an action.
- */
-interface KillMessage {
-  /** Whether the kill succeeded or failed. Controls text color (green/red). */
-  type: 'success' | 'error';
-  /** Human-readable description of the outcome, e.g. "Killed nginx:80". */
-  text: string;
-}
+import type { AppMode, KillMessage } from '../app.js';
 
 /**
  * Props for the StatusBar component.
  */
 interface StatusBarProps {
   /** Current interaction mode. Determines which keyboard hints are shown. */
-  mode: 'navigate' | 'search';
+  mode: AppMode;
   /**
    * Whether the app is waiting for the user to confirm a kill action.
    * When true, the entire status bar is replaced with the confirmation prompt —

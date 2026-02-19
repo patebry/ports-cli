@@ -200,4 +200,22 @@ describe('getPorts', () => {
 
     expect(getPorts()).toEqual([]);
   });
+
+  // ---------------------------------------------------------------------------
+  // 11. Blank lines interspersed in output are skipped
+  // ---------------------------------------------------------------------------
+  it('skips blank lines interspersed in lsof output', () => {
+    const output = [
+      HEADER,
+      '',
+      makeLine('node', '12345', 'user', '127.0.0.1:3000'),
+      '',
+    ].join('\n');
+
+    mockExecSync.mockReturnValue(output);
+
+    expect(getPorts()).toEqual([
+      { port: 3000, process: 'node', pid: '12345', address: '127.0.0.1' },
+    ]);
+  });
 });

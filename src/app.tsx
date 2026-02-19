@@ -35,7 +35,7 @@ import { killPort } from './utils/killPort.js';
  * - `'search'`   — entered via `/`; printable keystrokes are appended to
  *                  searchQuery and filter the visible port list in real time
  */
-type AppMode = 'navigate' | 'search';
+export type AppMode = 'navigate' | 'search';
 
 /**
  * Transient feedback message displayed in the StatusBar after a kill attempt.
@@ -44,7 +44,7 @@ type AppMode = 'navigate' | 'search';
  * @property type - `'success'` renders green; `'error'` renders red
  * @property text - Human-readable description, e.g. "Killed nginx (1234)" or "Failed: EPERM"
  */
-interface KillMessage {
+export interface KillMessage {
   type: 'success' | 'error';
   text: string;
 }
@@ -169,15 +169,6 @@ export function App() {
   };
 
   /**
-   * Thin wrapper around executeKill for the direct-kill keybinding path (Ctrl+K).
-   * Exists as a named function so the keyboard handler can call it by name rather than
-   * inlining executeKill, keeping the useInput block readable.
-   */
-  const handleKill = () => {
-    executeKill();
-  };
-
-  /**
    * Central keyboard handler. Ink calls this for EVERY keypress regardless of which
    * component is focused — there is no event bubbling or stopPropagation in Ink.
    * Keys are evaluated top-to-bottom; the first matching branch returns early so
@@ -195,7 +186,7 @@ export function App() {
     // Ctrl+C is the universal "quit" chord; checked first so it always works.
     // Ctrl+K is a power-user shortcut that kills without requiring Enter + y confirmation.
     if (key.ctrl && input === 'c') { exit(); return; }
-    if (key.ctrl && input === 'k') { handleKill(); return; }
+    if (key.ctrl && input === 'k') { executeKill(); return; }
 
     // --- Help toggle ---
     // `?` only toggles help in navigate mode so that typing `?` in a search query
