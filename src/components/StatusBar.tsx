@@ -1,7 +1,20 @@
 import React from 'react';
 import { Box, Text } from 'ink';
+import { PortEntry } from '../utils/getPorts.js';
 
-export function StatusBar({ mode, confirmKill, killMessage, selectedPort }) {
+interface KillMessage {
+  type: 'success' | 'error';
+  text: string;
+}
+
+interface StatusBarProps {
+  mode: 'navigate' | 'search';
+  confirmKill: boolean;
+  killMessage: KillMessage | null;
+  selectedPort: PortEntry | null;
+}
+
+export function StatusBar({ mode, confirmKill, killMessage, selectedPort }: StatusBarProps) {
   // Confirm kill state takes priority
   if (confirmKill && selectedPort) {
     return (

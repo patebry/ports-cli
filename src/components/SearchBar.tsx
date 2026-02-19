@@ -1,7 +1,12 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 
-export function SearchBar({ value, isActive }) {
+interface SearchBarProps {
+  value: string;
+  isActive: boolean;
+}
+
+export function SearchBar({ value, isActive }: SearchBarProps) {
   return (
     <Box borderStyle="single" borderColor={isActive ? 'cyan' : value ? 'yellow' : 'gray'} paddingX={1}>
       <Text color={isActive ? 'cyan' : 'gray'}>{'/ '}</Text>

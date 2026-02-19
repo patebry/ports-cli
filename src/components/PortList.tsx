@@ -1,8 +1,14 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import { PortRow, COL_PORT, COL_PROCESS, COL_PID } from './PortRow.jsx';
+import { PortEntry } from '../utils/getPorts.js';
+import { PortRow, COL_PORT, COL_PROCESS, COL_PID } from './PortRow.js';
 
-export function PortList({ ports, selectedIndex }) {
+interface PortListProps {
+  ports: PortEntry[];
+  selectedIndex: number;
+}
+
+export function PortList({ ports, selectedIndex }: PortListProps) {
   const portHeader = 'PORT'.padEnd(COL_PORT);
   const processHeader = 'PROCESS'.padEnd(COL_PROCESS);
   const pidHeader = 'PID'.padEnd(COL_PID);

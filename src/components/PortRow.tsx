@@ -1,11 +1,17 @@
 import React from 'react';
 import { Box, Text } from 'ink';
+import { PortEntry } from '../utils/getPorts.js';
 
 const COL_PORT = 8;
 const COL_PROCESS = 16;
 const COL_PID = 8;
 
-export function PortRow({ port, isSelected }) {
+interface PortRowProps {
+  port: PortEntry;
+  isSelected: boolean;
+}
+
+export function PortRow({ port, isSelected }: PortRowProps) {
   const portStr = String(port.port).padEnd(COL_PORT);
   const processStr = port.process.slice(0, COL_PROCESS).padEnd(COL_PROCESS);
   const pidStr = String(port.pid).padEnd(COL_PID);

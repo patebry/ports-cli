@@ -1,6 +1,13 @@
 import { execSync } from 'child_process';
 
-export function getPorts() {
+export interface PortEntry {
+  port: number;
+  process: string;
+  pid: string;
+  address: string;
+}
+
+export function getPorts(): PortEntry[] {
   try {
     const output = execSync('lsof -nP -iTCP -sTCP:LISTEN 2>/dev/null', {
       encoding: 'utf8',
@@ -11,8 +18,8 @@ export function getPorts() {
     // Skip header line
     const dataLines = lines.slice(1);
 
-    const seen = new Set();
-    const ports = [];
+    const seen = new Set<string>();
+    const ports: PortEntry[] = [];
 
     for (const line of dataLines) {
       if (!line.trim()) continue;

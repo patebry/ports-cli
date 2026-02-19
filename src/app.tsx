@@ -1,33 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { Box, useInput, useApp } from 'ink';
-import { Header } from './components/Header.jsx';
-import { SearchBar } from './components/SearchBar.jsx';
-import { PortList } from './components/PortList.jsx';
-import { StatusBar } from './components/StatusBar.jsx';
-import { HelpOverlay } from './components/HelpOverlay.jsx';
-import { getPorts } from './utils/getPorts.js';
+import { Header } from './components/Header.js';
+import { SearchBar } from './components/SearchBar.js';
+import { PortList } from './components/PortList.js';
+import { StatusBar } from './components/StatusBar.js';
+import { HelpOverlay } from './components/HelpOverlay.js';
+import { getPorts, PortEntry } from './utils/getPorts.js';
 import { killPort } from './utils/killPort.js';
+
+type AppMode = 'navigate' | 'search';
+
+interface KillMessage {
+  type: 'success' | 'error';
+  text: string;
+}
 
 export function App() {
   const { exit } = useApp();
 
-  const [ports, setPorts] = useState(() => getPorts());
+  const [ports, setPorts] = useState<PortEntry[]>(() => getPorts());
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [killMessage, setKillMessage] = useState(null);
-  const [mode, setMode] = useState('navigate');
-  const [showHelp, setShowHelp] = useState(false);
-  const [confirmKill, setConfirmKill] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [killMessage, setKillMessage] = useState<KillMessage | null>(null);
+  const [mode, setMode] = useState<AppMode>('navigate');
+  const [showHelp, setShowHelp] = useState<boolean>(false);
+  const [confirmKill, setConfirmKill] = useState<boolean>(false);
 
   const filteredPorts = ports.filter(p =>
     !searchQuery ||
-    ['process', 'port', 'address'].some(k =>
-      String(p[k]).toLowerCase().includes(searchQuery.toLowerCase())
+    [p.process, String(p.port), p.address].some(v =>
+      v.toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
 
   const clampedIndex = Math.min(selectedIndex, Math.max(0, filteredPorts.length - 1));
-  const selectedPort = filteredPorts[clampedIndex] ?? null;
+  const selectedPort: PortEntry | null = filteredPorts[clampedIndex] ?? null;
 
   useEffect(() => {
     if (selectedIndex !== clampedIndex) {

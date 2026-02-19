@@ -10,7 +10,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "esbuild bin/ports.js --bundle --platform=node --target=node18 --format=esm --jsx=automatic --loader:.js=jsx --loader:.jsx=jsx --outfile=dist/ports.js --banner:js='#!/usr/bin/env node' --external:react --external:ink --external:ink-text-input && chmod +x dist/ports.js",
+    "build": "esbuild bin/ports.tsx --bundle --platform=node --target=node18 --format=esm --jsx=automatic --loader:.ts=ts --loader:.tsx=tsx --loader:.js=jsx --loader:.jsx=jsx --outfile=dist/ports.js --banner:js='#!/usr/bin/env node' --external:react --external:ink --external:ink-text-input && chmod +x dist/ports.js",
+    "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build"
   },
   "engines": {
@@ -30,6 +31,9 @@
     "react": "^18"
   },
   "devDependencies": {
-    "esbuild": "^0.27.3"
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "esbuild": "^0.27.3",
+    "typescript": "^5.9.3"
   }
 }
