@@ -10,6 +10,7 @@ import { render } from 'ink-testing-library';
 import { Box } from 'ink';
 
 import { useKeyboardInput, type UseKeyboardInputProps } from '../../src/hooks/useKeyboardInput.js';
+import type { AppMode } from '../../src/types.js';
 import { tick } from '../helpers.js';
 
 // Test component that renders nothing but sets up the hook
@@ -216,5 +217,38 @@ describe('useKeyboardInput', () => {
     // Filter out any calls that pass a function (the append call uses q => q + input)
     const appendCalls = calls.filter((c: unknown[]) => typeof c[0] === 'function');
     expect(appendCalls).toHaveLength(0);
+  });
+
+  // --- Search mode: non-printable key with empty input (line 219 false branch) ---
+
+  it('does not append to search query when input is empty (e.g. Tab key)', async () => {
+    result = render(<TestHarness {...props} mode="search" />);
+    await tick();
+    // Tab sends input='' with key.tab=true in ink; it is not handled by any
+    // earlier branch in search mode, so it reaches the `if (input)` guard.
+    result.stdin.write('\t');
+    await tick();
+    // setSearchQuery should not have been called with an appender function
+    const calls = (props.setSearchQuery as ReturnType<typeof vi.fn>).mock.calls;
+    const appendCalls = calls.filter((c: unknown[]) => typeof c[0] === 'function');
+    expect(appendCalls).toHaveLength(0);
+  });
+
+  // --- Unreachable mode fallthrough (line 186 false branch) ---
+
+  it('does nothing when mode is an unexpected value (defensive branch)', async () => {
+    // TypeScript's AppMode is 'navigate' | 'search', but V8 coverage still
+    // tracks the false branch of `if (mode === 'search')` at line 186.
+    // Force an impossible mode value to exercise that branch.
+    result = render(<TestHarness {...props} mode={'other' as unknown as AppMode} />);
+    await tick();
+    result.stdin.write('x');
+    await tick();
+    // No callbacks should fire beyond the initial render
+    expect(props.moveUp).not.toHaveBeenCalled();
+    expect(props.moveDown).not.toHaveBeenCalled();
+    expect(props.setSearchQuery).not.toHaveBeenCalled();
+    expect(props.setMode).not.toHaveBeenCalled();
+    expect(props.refresh).not.toHaveBeenCalled();
   });
 });

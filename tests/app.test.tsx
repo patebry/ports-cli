@@ -593,6 +593,20 @@ describe('App', () => {
     expect(result.lastFrame()).toContain('node');
     expect(result.lastFrame()).not.toContain('nginx');
   });
+
+  // ─── Case-insensitive search ────────────────────────────────────────────────
+
+  it('matches process names case-insensitively (uppercase query matches lowercase process)', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('/');
+    await tick(); // let mode='search' re-render before typing characters
+    result.stdin.write('NODE'); // uppercase query should match lowercase "node" process
+    await tick();
+    expect(result.lastFrame()).toContain('node');
+    expect(result.lastFrame()).not.toContain('nginx');
+  });
 });
 
 // --- kill message auto-clear ---

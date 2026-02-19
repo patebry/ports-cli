@@ -115,4 +115,27 @@ describe('killPort', () => {
     killPort('  ');
     expect(mockExecSync).not.toHaveBeenCalled();
   });
+
+  // ---------------------------------------------------------------------------
+  // Edge PIDs: NaN, Infinity
+  // ---------------------------------------------------------------------------
+  it('returns { success: false, error: "Invalid PID" } for "NaN"', () => {
+    expect(killPort('NaN')).toEqual({ success: false, error: 'Invalid PID' });
+  });
+
+  it('does not call execSync for "NaN" PID', () => {
+    killPort('NaN');
+    expect(mockExecSync).not.toHaveBeenCalled();
+  });
+
+  it('returns { success: false, error: "Invalid PID" } for "Infinity"', () => {
+    // parseInt("Infinity", 10) returns NaN because "I" is not a digit,
+    // so this hits the isNaN guard before the <= 0 check.
+    expect(killPort('Infinity')).toEqual({ success: false, error: 'Invalid PID' });
+  });
+
+  it('does not call execSync for "Infinity" PID', () => {
+    killPort('Infinity');
+    expect(mockExecSync).not.toHaveBeenCalled();
+  });
 });

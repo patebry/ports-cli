@@ -244,4 +244,62 @@ describe('getPorts', () => {
       address: '127.0.0.1',
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // 13. Malformed IPv6 address (unmatched bracket)
+  // ---------------------------------------------------------------------------
+  it('parses a malformed IPv6 address with unmatched bracket as a raw address', () => {
+    // "[::1" has no closing bracket — lastIndexOf(':') finds the colon inside
+    // the address, splitting into rawAddr="[:" and port from "1:3000" → "3000".
+    // The address is not normalized (it does not match any known pattern),
+    // but the line is still parseable and the port is valid.
+    const output = [
+      HEADER,
+      makeLine('node', '50', 'user', '[::1:3000'),
+    ].join('\n');
+
+    mockExecSync.mockReturnValue(output);
+
+    const result = getPorts();
+    // lastIndexOf(':') on "[::1:3000" finds index 4 (the colon before "3000")
+    // rawAddr = "[::1", port = 3000 — a valid numeric port, so entry is kept
+    expect(result).toHaveLength(1);
+    expect(result[0].port).toBe(3000);
+    expect(result[0].address).toBe('[::1');
+  });
+
+  // ---------------------------------------------------------------------------
+  // 14. Non-numeric port in lsof NAME field
+  // ---------------------------------------------------------------------------
+  it('skips a line where the port portion is non-numeric (e.g., "abc")', () => {
+    const output = [
+      HEADER,
+      makeLine('node', '60', 'user', '127.0.0.1:abc'),
+    ].join('\n');
+
+    mockExecSync.mockReturnValue(output);
+
+    // parseInt("abc", 10) returns NaN → the `if (isNaN(port)) continue` guard skips it
+    expect(getPorts()).toEqual([]);
+  });
+
+  it('keeps valid entries while skipping lines with non-numeric ports', () => {
+    const output = [
+      HEADER,
+      makeLine('node', '70', 'user', '127.0.0.1:abc'),
+      makeLine('nginx', '80', 'root', '0.0.0.0:8080'),
+    ].join('\n');
+
+    mockExecSync.mockReturnValue(output);
+
+    const result = getPorts();
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual({
+      port: 8080,
+      process: 'nginx',
+      pid: '80',
+      user: 'root',
+      address: '0.0.0.0',
+    });
+  });
 });
