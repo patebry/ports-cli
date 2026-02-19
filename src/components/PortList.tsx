@@ -21,6 +21,16 @@ const MIN_PROCESS_COL_WIDTH = 16;
 const MAX_PROCESS_COL_WIDTH = 40;
 
 /**
+ * UI overhead constants for viewport calculation.
+ * These account for non-port-row UI elements that consume vertical space.
+ */
+const SEARCH_BAR_HEIGHT = 3;  // Border + padding + content
+const HEADER_ROW_HEIGHT = 1;  // Column headers
+const STATUS_BAR_HEIGHT = 1;  // Bottom status bar
+const BUFFER_HEIGHT = 1;       // Prevents content from touching bottom edge
+const TOTAL_UI_OVERHEAD = SEARCH_BAR_HEIGHT + HEADER_ROW_HEIGHT + STATUS_BAR_HEIGHT + BUFFER_HEIGHT;
+
+/**
  * Calculates the dynamic width for the PROCESS column based on terminal width.
  *
  * The PROCESS column receives whatever space remains after allocating fixed
@@ -60,18 +70,17 @@ interface PortListProps {
  * calculates how many rows fit in the terminal and only renders that window
  * of ports, centered around the selection when possible.
  */
-export function PortList({ ports, selectedIndex }: PortListProps) {
+export function PortList({ ports, selectedIndex }: PortListProps): React.JSX.Element {
   const { stdout } = useStdout();
   // Reserve space for the row prefix (2), PORT, USER, PID, and a ~20-char
   // ADDRESS column at the end. Whatever remains goes to PROCESS so it expands
   // naturally on wider terminals instead of truncating at a fixed character limit.
   const colProcess = calculateProcessColWidth(stdout?.columns ?? DEFAULT_TERMINAL_WIDTH);
 
-  // Calculate how many port rows can fit in the terminal.
-  // Total overhead: SearchBar (3 lines with border) + header row (1) + StatusBar (1) = 5 lines.
-  // We also add 1 for the empty state message to prevent it from being cut off.
+  // Calculate how many port rows can fit in the terminal by subtracting
+  // UI overhead (search bar, header, status bar, buffer) from available rows.
   const terminalRows = stdout?.rows ?? 24; // Fallback to 24 if rows unavailable
-  const maxVisiblePorts = Math.max(1, terminalRows - 6);
+  const maxVisiblePorts = Math.max(1, terminalRows - TOTAL_UI_OVERHEAD);
 
   // Calculate the visible window of ports to display.
   // Strategy: keep the selected item roughly centered in the viewport when scrolling.
@@ -101,14 +110,14 @@ export function PortList({ ports, selectedIndex }: PortListProps) {
   const pidHeader = 'PID'.padEnd(COL_PID);
 
   return (
-    <Box flexDirection="column">
+    <Box flexDirection='column'>
       <Box paddingX={1}>
         <Text>{'  '}</Text>
-        <Text bold color="gray">{portHeader}</Text>
-        <Text bold color="gray">{processHeader}</Text>
-        <Text bold color="gray">{userHeader}</Text>
-        <Text bold color="gray">{pidHeader}</Text>
-        <Text bold color="gray">ADDRESS</Text>
+        <Text bold color='gray'>{portHeader}</Text>
+        <Text bold color='gray'>{processHeader}</Text>
+        <Text bold color='gray'>{userHeader}</Text>
+        <Text bold color='gray'>{pidHeader}</Text>
+        <Text bold color='gray'>ADDRESS</Text>
       </Box>
       {ports.length === 0 ? (
         // Empty state: shown when the filtered or unfiltered port list is empty.

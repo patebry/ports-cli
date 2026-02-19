@@ -5,6 +5,7 @@
  */
 
 import { useInput } from 'ink';
+
 import type { AppMode, PortEntry } from '../types.js';
 
 /**

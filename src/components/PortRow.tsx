@@ -53,7 +53,7 @@ interface PortRowProps {
  * (blue background, cyan text, arrow indicator) and a plain layout for all
  * other rows. The column values are padded to fixed widths for alignment.
  */
-export function PortRow({ port, isSelected, colProcess }: PortRowProps) {
+export function PortRow({ port, isSelected, colProcess }: PortRowProps): React.JSX.Element {
   // padEnd() pads each value to its column's fixed character width so all rows
   // line up vertically in a monospace terminal regardless of content length.
   const portStr = String(port.port).padEnd(COL_PORT);
@@ -67,15 +67,15 @@ export function PortRow({ port, isSelected, colProcess }: PortRowProps) {
 
   if (isSelected) {
     return (
-      <HighlightBox backgroundColor="blue">
+      <HighlightBox backgroundColor='blue'>
         {/* "▶" provides an unambiguous visual marker of the current selection
             position — more scannable than background color alone. */}
-        <Text color="cyan">{SELECTION_ARROW}</Text>
-        <Text color="cyan">{portStr}</Text>
-        <Text color="cyan">{processStr}</Text>
-        <Text color="cyan">{userStr}</Text>
-        <Text color="cyan">{pidStr}</Text>
-        <Text color="cyan">{addressStr}</Text>
+        <Text color='cyan'>{SELECTION_ARROW}</Text>
+        <Text color='cyan'>{portStr}</Text>
+        <Text color='cyan'>{processStr}</Text>
+        <Text color='cyan'>{userStr}</Text>
+        <Text color='cyan'>{pidStr}</Text>
+        <Text color='cyan'>{addressStr}</Text>
       </HighlightBox>
     );
   }

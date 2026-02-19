@@ -267,5 +267,33 @@ describe('PortList', () => {
       expect(frame).not.toContain('3000');
       expect(frame).not.toContain('3001');
     });
+
+    it('corrects viewport when centered selection would cause endIndex overflow', () => {
+      // Regression test for PortList.tsx lines 89-90: if centering the selected item
+      // would push endIndex beyond the array length, snap to show the last N ports.
+      vi.mocked(useStdout).mockReturnValue({
+        stdout: { rows: 11, columns: 80 } as unknown as NodeJS.WriteStream, // 5 visible ports (11 - 6 overhead)
+        write: () => {},
+      });
+      const ports = Array.from({ length: 7 }, (_, i) => ({
+        port: 3000 + i,
+        process: `p${i}`,
+        pid: String(i),
+        user: 'u',
+        address: '127.0.0.1',
+      }));
+      // Select index 5 (port 3005). With halfWindow = 2, centering would give:
+      // startIndex = 5 - 2 = 3, endIndex = 3 + 5 = 8 (exceeds length 7).
+      // The correction should snap to: startIndex = 2, endIndex = 7 (showing last 5 ports).
+      const { lastFrame } = render(<PortList ports={ports} selectedIndex={5} />);
+      const frame = lastFrame() ?? '';
+      // Should show the last 5 ports (indices 2-6: ports 3002-3006)
+      expect(frame).toContain('3002'); // First in viewport
+      expect(frame).toContain('3006'); // Last in viewport
+      expect(frame).toContain('3005'); // Selected port
+      // First two ports should be scrolled out of view
+      expect(frame).not.toContain('3000');
+      expect(frame).not.toContain('3001');
+    });
   });
 });

@@ -52,19 +52,19 @@ interface StatusBarProps {
  * different keys are active in search vs. navigate mode (e.g. typing
  * characters filters in search mode but does nothing in navigate mode).
  */
-export function StatusBar({ mode, confirmKill, killMessage, selectedPort }: StatusBarProps) {
+export function StatusBar({ mode, confirmKill, killMessage, selectedPort }: StatusBarProps): React.JSX.Element {
   // Confirm kill takes highest priority and replaces the entire bar layout.
   // The user must respond (y or ESC) before any other interaction is possible,
   // so showing anything else here would be distracting and misleading.
   if (confirmKill && selectedPort) {
     return (
       <Box paddingX={1}>
-        <Text color="red">Kill </Text>
+        <Text color='red'>Kill </Text>
         <Text bold>{selectedPort.process}</Text>
-        <Text color="red">:{selectedPort.port}?  </Text>
-        <Text color="green">y </Text>
+        <Text color='red'>:{selectedPort.port}?  </Text>
+        <Text color='green'>y </Text>
         <Text dimColor>confirm  </Text>
-        <Text color="gray">ESC </Text>
+        <Text color='gray'>ESC </Text>
         <Text dimColor>cancel</Text>
       </Box>
     );
@@ -83,13 +83,13 @@ export function StatusBar({ mode, confirmKill, killMessage, selectedPort }: Stat
   // - In search mode, typing characters goes to the filter; navigation still works.
   // - In navigate mode, typing "/" enters search; "enter" triggers kill.
   const hints = mode === 'search'
-    ? <Text dimColor>type to filter  <Text color="cyan">↑↓/j k</Text> navigate  <Text color="cyan">enter</Text> done  <Text color="cyan">ESC</Text> clear</Text>
-    : <Text dimColor><Text color="cyan">↑↓/j k</Text> navigate  <Text color="cyan">/</Text> search  <Text color="cyan">enter</Text> kill  <Text color="cyan">r</Text> refresh  <Text color="cyan">?</Text> help  <Text color="cyan">q</Text> quit</Text>;
+    ? <Text dimColor>type to filter  <Text color='cyan'>↑↓/j k</Text> navigate  <Text color='cyan'>enter</Text> done  <Text color='cyan'>ESC</Text> clear</Text>
+    : <Text dimColor><Text color='cyan'>↑↓/j k</Text> navigate  <Text color='cyan'>/</Text> search  <Text color='cyan'>enter</Text> kill  <Text color='cyan'>r</Text> refresh  <Text color='cyan'>?</Text> help  <Text color='cyan'>q</Text> quit</Text>;
 
   return (
     // justifyContent="space-between" pins hints to the left edge and status
     // content to the right edge, making both scannable without crowding.
-    <Box justifyContent="space-between" paddingX={1}>
+    <Box justifyContent='space-between' paddingX={1}>
       <Box>{hints}</Box>
       <Box>{rightContent}</Box>
     </Box>

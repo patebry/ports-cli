@@ -33,17 +33,17 @@ interface SearchBarProps {
  * - **Inactive + value**: yellow "/" and value — signals an active filter
  * - **Inactive + empty**: gray "/", dimmed "to search" hint
  */
-export function SearchBar({ value, isActive }: SearchBarProps) {
+export function SearchBar({ value, isActive }: SearchBarProps): React.JSX.Element {
   return (
-    <Box borderStyle="round" borderColor={isActive ? 'cyan' : value ? 'yellow' : 'gray'} paddingX={1}>
-      <Text bold color="cyan">ports</Text>
+    <Box borderStyle='round' borderColor={isActive ? 'cyan' : value ? 'yellow' : 'gray'} paddingX={1}>
+      <Text bold color='cyan'>ports</Text>
       <Text color={isActive ? 'cyan' : value ? 'yellow' : 'gray'}>{'  / '}</Text>
       {isActive
         ? value
-          ? <Text>{value}<Text color="cyan">{CURSOR_CHAR}</Text></Text>
-          : <Text dimColor>type to filter...<Text color="cyan">{CURSOR_CHAR}</Text></Text>
+          ? <Text>{value}<Text color='cyan'>{CURSOR_CHAR}</Text></Text>
+          : <Text dimColor>type to filter...<Text color='cyan'>{CURSOR_CHAR}</Text></Text>
         : value
-          ? <Text color="yellow">{value}</Text>
+          ? <Text color='yellow'>{value}</Text>
           : <Text dimColor>to search</Text>
       }
     </Box>

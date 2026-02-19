@@ -55,14 +55,14 @@ const maxKeyLen = Math.max(...KEYBINDINGS.map(b => b.key.length));
  *
  * @returns Full-screen help overlay with keybinding table
  */
-export function HelpOverlay() {
+export function HelpOverlay(): React.JSX.Element {
   return (
-    <Box borderStyle="round" borderColor="cyan" flexDirection="column" paddingX={2} paddingY={1}>
-      <Text bold color="cyan">  Keybindings</Text>
+    <Box borderStyle='round' borderColor='cyan' flexDirection='column' paddingX={2} paddingY={1}>
+      <Text bold color='cyan'>  Keybindings</Text>
       <Text> </Text>
       {KEYBINDINGS.map(({ key, desc }) => (
         <Text key={key}>
-          <Text color="cyan" bold>{key.padEnd(maxKeyLen)}</Text>{'  '}{desc}
+          <Text color='cyan' bold>{key.padEnd(maxKeyLen)}</Text>{'  '}{desc}
         </Text>
       ))}
       <Text> </Text>

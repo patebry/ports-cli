@@ -43,7 +43,7 @@ interface AppProps {
   _killMessageTimeoutMs?: number;
 }
 
-export function App({ _killMessageTimeoutMs = KILL_MESSAGE_TIMEOUT_MS }: AppProps = {}) {
+export function App({ _killMessageTimeoutMs = KILL_MESSAGE_TIMEOUT_MS }: AppProps = {}): React.JSX.Element {
   const { exit } = useApp();
 
   /** Master list of listening TCP ports from lsof. Refreshed every 2 seconds by the auto-refresh effect. */
@@ -222,7 +222,7 @@ export function App({ _killMessageTimeoutMs = KILL_MESSAGE_TIMEOUT_MS }: AppProp
    *   HelpOverlay — full-screen modal rendered on top when showHelp is true
    */
   return (
-    <Box flexDirection="column">
+    <Box flexDirection='column'>
       <SearchBar value={searchQuery} isActive={mode === 'search'} />
       <PortList ports={filteredPorts} selectedIndex={clampedIndex} />
       <StatusBar mode={mode} confirmKill={confirmKill} killMessage={killMessage} selectedPort={selectedPort} />

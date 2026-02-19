@@ -10,9 +10,11 @@ vi.mock('../src/utils/killPort.js', () => ({
 
 import React from 'react';
 import { render } from 'ink-testing-library';
+
 import { App } from '../src/app.js';
 import { getPorts } from '../src/utils/getPorts.js';
 import { killPort } from '../src/utils/killPort.js';
+import { tick } from './helpers.js';
 
 const mockGetPorts = vi.mocked(getPorts);
 const mockKillPort = vi.mocked(killPort);
@@ -21,30 +23,6 @@ const PORTS = [
   { port: 3000, process: 'node', pid: '100', user: 'patebryant', address: '127.0.0.1' },
   { port: 8080, process: 'nginx', pid: '200', user: 'root', address: '0.0.0.0' },
 ];
-
-/**
- * Wait for one macro-task cycle so React 18's MessageChannel-based scheduler
- * can flush pending work.
- *
- * CRITICAL INK TESTING PATTERN:
- *
- * stdin.write() in ink-testing-library v4 does NOT work immediately after render().
- * useInput registers its stdin 'readable' listener inside a useEffect (async after render).
- *
- * Required pattern:
- * 1. await tick() BEFORE stdin.write() - lets useInput's useEffect fire and register listener
- * 2. stdin.write('key') - now someone is listening
- * 3. await tick() AFTER stdin.write() - lets React re-render with new state
- *
- * Mode changes require a tick between them:
- *   write '/'; await tick(); write 'node'; await tick()
- *
- * IMPORTANT: vi.useFakeTimers() must NOT be active - it prevents React's internal
- * scheduler (which uses real setTimeout/MessageChannel) from firing.
- *
- * Always call unmount() in afterEach to stop the polling interval.
- */
-const tick = () => new Promise<void>(resolve => setTimeout(resolve, 10));
 
 describe('App', () => {
   let unmount: (() => void) | undefined;

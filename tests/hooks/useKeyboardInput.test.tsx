@@ -9,9 +9,9 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render } from 'ink-testing-library';
 import React from 'react';
 import { Box } from 'ink';
-import { useKeyboardInput, type UseKeyboardInputProps } from '../../src/hooks/useKeyboardInput.js';
 
-const tick = () => new Promise<void>(resolve => setTimeout(resolve, 10));
+import { useKeyboardInput, type UseKeyboardInputProps } from '../../src/hooks/useKeyboardInput.js';
+import { tick } from '../helpers.js';
 
 // Test component that renders nothing but sets up the hook
 function TestHarness(props: UseKeyboardInputProps) {
