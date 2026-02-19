@@ -85,4 +85,13 @@ describe('killPort', () => {
 
     expect(mockExecSync).toHaveBeenCalledWith('kill -9 42');
   });
+
+  it('returns the stringified value when execSync throws a non-Error', () => {
+    mockExecSync.mockImplementation(() => {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      throw 'raw string error';
+    });
+
+    expect(killPort('55')).toEqual({ success: false, error: 'raw string error' });
+  });
 });

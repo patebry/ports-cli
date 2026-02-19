@@ -62,7 +62,7 @@ export function killPort(pid: string): KillResult {
   } catch (err) {
     // execSync throws on non-zero exit (e.g. process already gone, permission
     // denied). TypeScript types catch-clause bindings as `unknown` in strict
-    // mode, so we cast to Error to safely access the `.message` property.
-    return { success: false, error: (err as Error).message };
+    // mode; instanceof narrows the type safely before accessing `.message`.
+    return { success: false, error: err instanceof Error ? err.message : String(err) };
   }
 }

@@ -16,9 +16,9 @@ import { PortEntry } from '../utils/getPorts.js';
  * regardless of terminal size: port numbers top out at 5 digits, PIDs at 7,
  * and macOS usernames are typically well under 14 characters.
  */
-const COL_PORT = 8;
-const COL_PID = 8;
-const COL_USER = 14;
+export const COL_PORT = 8;
+export const COL_PID = 8;
+export const COL_USER = 14;
 
 /**
  * Props for the PortRow component.
@@ -88,4 +88,3 @@ export function PortRow({ port, isSelected, colProcess }: PortRowProps) {
   );
 }
 
-export { COL_PORT, COL_PID, COL_USER };

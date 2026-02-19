@@ -174,6 +174,17 @@ describe('App', () => {
 
   // ─── Kill confirmation ───────────────────────────────────────────────────────
 
+  it('Enter on an empty port list is a no-op (no confirmation prompt)', async () => {
+    mockGetPorts.mockReturnValue([]);
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('\r'); // Enter with no ports
+    await tick();
+    // selectedPort is null → confirmKill must NOT be set → no "Kill" prompt
+    expect(result.lastFrame()).not.toContain('Kill');
+  });
+
   it('shows the kill confirmation prompt when Enter is pressed on a port', async () => {
     const result = render(<App />);
     unmount = result.unmount;
@@ -309,6 +320,17 @@ describe('App', () => {
 
   // ─── Navigate-mode ESC clear ─────────────────────────────────────────────────
 
+  it('ESC in navigate mode with no active filter is a no-op', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    // searchQuery is already empty; ESC should not crash and full list remains visible
+    result.stdin.write('\x1B'); // ESC
+    await tick();
+    expect(result.lastFrame()).toContain('node');
+    expect(result.lastFrame()).toContain('nginx');
+  });
+
   it('clears an active filter with ESC while in navigate mode', async () => {
     const result = render(<App />);
     unmount = result.unmount;
@@ -366,6 +388,20 @@ describe('App', () => {
     const frame = result.lastFrame() ?? '';
     const arrowPos = frame.indexOf('▶');
     expect(frame.substring(arrowPos)).toContain('node');
+  });
+
+  // ─── Ctrl key swallowing in search mode ──────────────────────────────────────
+
+  it('swallows Ctrl key combinations in search mode without modifying the query', async () => {
+    const result = render(<App />);
+    unmount = result.unmount;
+    await tick();
+    result.stdin.write('/');
+    await tick();
+    result.stdin.write('\x01'); // Ctrl+A (byte 0x01 → key.ctrl=true, input='a')
+    await tick();
+    // The query should remain empty — Ctrl combos must not be appended as literals
+    expect(result.lastFrame()).toContain('type to filter');
   });
 
   // ─── Ctrl+K direct kill ───────────────────────────────────────────────────────
