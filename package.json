@@ -13,13 +13,14 @@
     "url": "https://github.com/patebryant/ports-cli/issues"
   },
   "homepage": "https://github.com/patebryant/ports-cli#readme",
-  "os": ["darwin"],
+  "os": ["darwin", "linux"],
   "bin": {
     "ports": "./dist/ports.js",
     "ports-cli": "./dist/ports.js"
   },
   "files": [
     "dist",
+    "demo.gif",
     "README.md",
     "LICENSE"
   ],
@@ -44,6 +45,7 @@
     "process",
     "tcp",
     "macos",
+    "linux",
     "terminal",
     "interactive",
     "ink"

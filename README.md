@@ -1,7 +1,7 @@
 <h1 align="center">ports-cli</h1>
 
 <p align="center">
-  Interactive TUI for viewing and killing listening TCP ports on macOS.
+  Interactive TUI for viewing and killing listening TCP ports on macOS and Linux.
 </p>
 
 <p align="center">
@@ -9,7 +9,7 @@
   <a href="https://www.npmjs.com/package/ports-cli"><img src="https://img.shields.io/npm/dm/ports-cli.svg" alt="monthly downloads"></a>
   <a href="https://github.com/patebryant/ports-cli/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license"></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg" alt="node version"></a>
-  <img src="https://img.shields.io/badge/platform-macOS-lightgrey.svg" alt="platform">
+  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg" alt="platform">
   <img src="https://img.shields.io/badge/coverage-100%25-brightgreen.svg" alt="coverage">
 </p>
 
@@ -17,19 +17,9 @@
 
 ## Demo
 
-```
-  ┌ ports ──────────────────────────────────────────────┐
-  │                                                     │
-  └─────────────────────────────────────────────────────┘
-   Port     Address        PID      Process
- > 3000     127.0.0.1      41022    node
-   5432     127.0.0.1      1205     postgres
-   8080     0.0.0.0        8834     nginx
-   8443     127.0.0.1      41022    node
-   9090     0.0.0.0        5501     grafana
-
-  ↑↓/jk navigate | enter/x kill | / search | ? help | q quit
-```
+<p align="center">
+  <img src="demo.gif" alt="ports-cli demo" width="800">
+</p>
 
 ## Quick Start
 
@@ -90,7 +80,7 @@ ports --version, -v    Show version
 
 ## Requirements
 
-- **macOS** -- relies on `lsof` for port discovery
+- **macOS or Linux** -- requires `lsof` (pre-installed on macOS; install via `apt install lsof` or `dnf install lsof` on Linux)
 - **Node.js >= 18**
 
 ## Contributing
