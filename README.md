@@ -18,7 +18,7 @@
 ## Demo
 
 <p align="center">
-  <img src="demo.gif" alt="ports-cli demo" width="800">
+  <img src="https://raw.githubusercontent.com/patebryant/ports-cli/main/demo.gif" alt="ports-cli demo" width="800">
 </p>
 
 ## Quick Start

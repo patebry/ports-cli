@@ -23,7 +23,7 @@ const args = process.argv.slice(2);
 if (args.includes('--help') || args.includes('-h')) {
   console.log(`ports-cli v${version}
 
-Interactive TUI for viewing and killing listening TCP ports on macOS.
+Interactive TUI for viewing and killing listening TCP ports on macOS and Linux.
 
 Usage:
   ports [options]
