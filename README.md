@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/ports-cli"><img src="https://img.shields.io/npm/v/ports-cli.svg" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/ports-cli"><img src="https://img.shields.io/npm/dm/ports-cli.svg" alt="monthly downloads"></a>
-  <a href="https://github.com/patebryant/ports-cli/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license"></a>
+  <a href="https://github.com/patebry/ports-cli/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license"></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg" alt="node version"></a>
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg" alt="platform">
   <img src="https://img.shields.io/badge/coverage-100%25-brightgreen.svg" alt="coverage">
@@ -18,7 +18,7 @@
 ## Demo
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/patebryant/ports-cli/main/demo.gif" alt="ports-cli demo" width="800">
+  <img src="https://raw.githubusercontent.com/patebry/ports-cli/main/demo.gif" alt="ports-cli demo" width="800">
 </p>
 
 ## Quick Start
@@ -86,7 +86,7 @@ ports --version, -v    Show version
 ## Contributing
 
 ```sh
-git clone https://github.com/patebryant/ports-cli.git
+git clone https://github.com/patebry/ports-cli.git
 cd ports-cli
 npm install
 ```
