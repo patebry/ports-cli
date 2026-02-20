@@ -1,6 +1,6 @@
 {
   "name": "ports-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Interactive TUI for viewing and killing listening TCP ports",
   "type": "module",
   "repository": {
